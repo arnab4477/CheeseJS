@@ -1,5 +1,5 @@
 import { Component, Prop, h, ComponentDidLoad } from '@stencil/core';
-import { generateCheckeredBoard } from '../../checkerboard';
+import { generateCheckeredBoard } from '../../utils/checkerboard';
 
 // Define the 'Checkerboard' component
 @Component({
@@ -9,17 +9,14 @@ import { generateCheckeredBoard } from '../../checkerboard';
 })
 export class Checkerboard implements ComponentDidLoad {
   // Component properties for the square colors
-  @Prop() lightSquare: string = 'white';
-  @Prop() darkSquare: string = 'black';
+  @Prop({ mutable: true }) lightSquare: string = 'white';
+  @Prop({ mutable: true }) darkSquare: string = 'black';
 
   // A reference to the checkerboard container element
-  private checkerboardContainer: HTMLElement;
+  checkerboardContainer: HTMLElement;
 
   // The html string for the checkered board, generated with the goven colors as props
-  private checkerboardHTML = generateCheckeredBoard(
-    this.lightSquare,
-    this.darkSquare
-  );
+  checkerboardHTML = generateCheckeredBoard(this.lightSquare, this.darkSquare);
 
   // This method is called when the component has finished loading
   componentDidLoad() {

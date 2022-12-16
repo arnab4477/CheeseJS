@@ -1,4 +1,4 @@
-import { B as BUILD, c as consoleDevInfo, p as plt, w as win, H, d as doc, N as NAMESPACE, a as promiseResolve, b as bootstrapLazy } from './index-88ac672c.js';
+import { B as BUILD, c as consoleDevInfo, p as plt, w as win, H, d as doc, N as NAMESPACE, a as promiseResolve, b as bootstrapLazy } from './index-983f3eef.js';
 import { g as globalScripts } from './app-globals-0f993ce5.js';
 
 /*
@@ -125,5 +125,5 @@ const patchCloneNodeFix = (HTMLElementPrototype) => {
 
 patchBrowser().then(options => {
   globalScripts();
-  return bootstrapLazy([["checker-board",[[1,"checker-board",{"lightSquare":[1,"light-square"],"darkSquare":[1,"dark-square"]}]]]], options);
+  return bootstrapLazy([["checker-board",[[1,"checker-board",{"lightSquare":[1025,"light-square"],"darkSquare":[1025,"dark-square"]}]]]], options);
 });

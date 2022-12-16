@@ -1,5 +1,27 @@
+'use strict';
+
+function _interopNamespace(e) {
+  if (e && e.__esModule) return e;
+  var n = Object.create(null);
+  if (e) {
+    Object.keys(e).forEach(function (k) {
+      if (k !== 'default') {
+        var d = Object.getOwnPropertyDescriptor(e, k);
+        Object.defineProperty(n, k, d.get ? d : {
+          enumerable: true,
+          get: function () {
+            return e[k];
+          }
+        });
+      }
+    });
+  }
+  n['default'] = e;
+  return Object.freeze(n);
+}
+
 const NAMESPACE = 'cheese';
-const BUILD = /* cheese */ { allRenderFn: true, appendChildSlotFix: false, asyncLoading: true, asyncQueue: false, attachStyles: true, cloneNodeFix: false, cmpDidLoad: true, cmpDidRender: false, cmpDidUnload: false, cmpDidUpdate: false, cmpShouldUpdate: false, cmpWillLoad: false, cmpWillRender: false, cmpWillUpdate: false, connectedCallback: false, constructableCSS: false, cssAnnotations: true, cssVarShim: false, devTools: true, disconnectedCallback: false, dynamicImportShim: false, element: false, event: false, hasRenderFn: true, hostListener: false, hostListenerTarget: false, hostListenerTargetBody: false, hostListenerTargetDocument: false, hostListenerTargetParent: false, hostListenerTargetWindow: false, hotModuleReplacement: true, hydrateClientSide: false, hydrateServerSide: false, hydratedAttribute: false, hydratedClass: true, initializeNextTick: false, invisiblePrehydration: true, isDebug: false, isDev: true, isTesting: false, lazyLoad: true, lifecycle: true, lifecycleDOMEvents: false, member: true, method: false, mode: false, observeAttribute: false, profile: true, prop: false, propBoolean: false, propMutable: false, propNumber: false, propString: false, reflect: false, safari10: false, scoped: false, scopedSlotTextContentFix: false, scriptDataOpts: false, shadowDelegatesFocus: false, shadowDom: true, shadowDomShim: false, slot: false, slotChildNodesFix: false, slotRelocation: false, state: false, style: true, svg: false, taskQueue: true, transformTagName: false, updatable: true, vdomAttribute: true, vdomClass: false, vdomFunctional: false, vdomKey: false, vdomListener: false, vdomPropOrAttr: true, vdomRef: true, vdomRender: true, vdomStyle: false, vdomText: false, vdomXlink: false, watchCallback: false };
+const BUILD = /* cheese */ { allRenderFn: true, appendChildSlotFix: false, asyncLoading: true, asyncQueue: false, attachStyles: true, cloneNodeFix: false, cmpDidLoad: true, cmpDidRender: false, cmpDidUnload: false, cmpDidUpdate: false, cmpShouldUpdate: false, cmpWillLoad: false, cmpWillRender: false, cmpWillUpdate: false, connectedCallback: false, constructableCSS: true, cssAnnotations: true, cssVarShim: false, devTools: false, disconnectedCallback: false, dynamicImportShim: false, element: false, event: false, hasRenderFn: true, hostListener: false, hostListenerTarget: false, hostListenerTargetBody: false, hostListenerTargetDocument: false, hostListenerTargetParent: false, hostListenerTargetWindow: false, hotModuleReplacement: false, hydrateClientSide: false, hydrateServerSide: false, hydratedAttribute: false, hydratedClass: true, initializeNextTick: false, invisiblePrehydration: true, isDebug: false, isDev: true, isTesting: true, lazyLoad: true, lifecycle: true, lifecycleDOMEvents: true, member: true, method: false, mode: false, observeAttribute: true, profile: false, prop: true, propBoolean: false, propMutable: true, propNumber: false, propString: true, reflect: false, safari10: false, scoped: false, scopedSlotTextContentFix: false, scriptDataOpts: false, shadowDelegatesFocus: false, shadowDom: true, shadowDomShim: false, slot: false, slotChildNodesFix: false, slotRelocation: false, state: false, style: true, svg: false, taskQueue: true, transformTagName: false, updatable: true, vdomAttribute: true, vdomClass: false, vdomFunctional: false, vdomKey: false, vdomListener: false, vdomPropOrAttr: true, vdomRef: true, vdomRender: true, vdomStyle: false, vdomText: false, vdomXlink: false, watchCallback: false };
 const Env = /* cheese */ {};
 
 /**
@@ -2230,7 +2252,7 @@ const initializeComponent = async (elm, hostRef, cmpMeta, hmrVersionId, Cstr) =>
                     BUILD.shadowDom &&
                     BUILD.shadowDomShim &&
                     cmpMeta.$flags$ & 8 /* CMP_FLAGS.needsShadowDomShim */) {
-                    style = await import('./shadow-css-ed4599f8.js').then((m) => m.scopeCss(style, scopeId, false));
+                    style = await Promise.resolve().then(function () { return require('./shadow-css-bf3843d2.js'); }).then((m) => m.scopeCss(style, scopeId, false));
                 }
                 registerStyle(scopeId, style, !!(cmpMeta.$flags$ & 1 /* CMP_FLAGS.shadowDomEncapsulation */));
                 endRegisterStyles();
@@ -3117,12 +3139,12 @@ const loadModule = (cmpMeta, hostRef, hmrVersionId) => {
         return module[exportName];
     }
     /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
-    return import(
+    return Promise.resolve().then(function () { return /*#__PURE__*/_interopNamespace(require(
     /* @vite-ignore */
     /* webpackInclude: /\.entry\.js$/ */
     /* webpackExclude: /\.system\.entry\.js$/ */
     /* webpackMode: "lazy" */
-    `./${bundleId}.entry.js${BUILD.hotModuleReplacement && hmrVersionId ? '?s-hmr=' + hmrVersionId : ''}`).then((importedModule) => {
+    `./${bundleId}.entry.js${BUILD.hotModuleReplacement && hmrVersionId ? '?s-hmr=' + hmrVersionId : ''}`)); }).then((importedModule) => {
         if (!BUILD.hotModuleReplacement) {
             cmpModules.set(bundleId, importedModule);
         }
@@ -3259,4 +3281,15 @@ const nextTick = /*@__PURE__*/ (cb) => promiseResolve().then(cb);
 const readTask = /*@__PURE__*/ queueTask(queueDomReads, false);
 const writeTask = /*@__PURE__*/ queueTask(queueDomWrites, true);
 
-export { BUILD as B, CSS as C, H, NAMESPACE as N, promiseResolve as a, bootstrapLazy as b, consoleDevInfo as c, doc as d, h, plt as p, registerInstance as r, win as w };
+exports.BUILD = BUILD;
+exports.CSS = CSS;
+exports.H = H;
+exports.NAMESPACE = NAMESPACE;
+exports.bootstrapLazy = bootstrapLazy;
+exports.consoleDevInfo = consoleDevInfo;
+exports.doc = doc;
+exports.h = h;
+exports.plt = plt;
+exports.promiseResolve = promiseResolve;
+exports.registerInstance = registerInstance;
+exports.win = win;

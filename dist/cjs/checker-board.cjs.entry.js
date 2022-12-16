@@ -1,4 +1,8 @@
-import { r as registerInstance, h } from './index-983f3eef.js';
+'use strict';
+
+Object.defineProperty(exports, '__esModule', { value: true });
+
+const index = require('./index-9d39a049.js');
 
 const BoardArray = [
   [0, 1, 2, 3, 4, 5, 6, 7],
@@ -53,7 +57,7 @@ const checkerBoardCss = "#checker-board-container{position:relative;width:400px;
 
 const Checkerboard = class {
   constructor(hostRef) {
-    registerInstance(this, hostRef);
+    index.registerInstance(this, hostRef);
     // The html string for the checkered board, generated with the goven colors as props
     this.checkerboardHTML = generateCheckeredBoard(this.lightSquare, this.darkSquare);
     this.lightSquare = 'white';
@@ -65,9 +69,9 @@ const Checkerboard = class {
     this.checkerboardContainer.innerHTML = this.checkerboardHTML;
   }
   render() {
-    return (h("div", { ref: (el) => (this.checkerboardContainer = el), id: "checker-board-container" }));
+    return (index.h("div", { ref: (el) => (this.checkerboardContainer = el), id: "checker-board-container" }));
   }
 };
 Checkerboard.style = checkerBoardCss;
 
-export { Checkerboard as checker_board };
+exports.checker_board = Checkerboard;

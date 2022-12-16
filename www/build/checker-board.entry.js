@@ -1,4 +1,4 @@
-import { r as registerInstance, h } from './index-88ac672c.js';
+import { r as registerInstance, h } from './index-983f3eef.js';
 
 const BoardArray = [
   [0, 1, 2, 3, 4, 5, 6, 7],
