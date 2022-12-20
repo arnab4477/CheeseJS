@@ -7,8 +7,13 @@
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
 export namespace Components {
     interface CheckerBoard {
-        "darkSquare": string;
-        "lightSquare": string;
+        "dark"?: string;
+        "light"?: string;
+    }
+    interface ChessBoard {
+        "dark"?: string;
+        "fen"?: string;
+        "light"?: string;
     }
 }
 declare global {
@@ -18,17 +23,30 @@ declare global {
         prototype: HTMLCheckerBoardElement;
         new (): HTMLCheckerBoardElement;
     };
+    interface HTMLChessBoardElement extends Components.ChessBoard, HTMLStencilElement {
+    }
+    var HTMLChessBoardElement: {
+        prototype: HTMLChessBoardElement;
+        new (): HTMLChessBoardElement;
+    };
     interface HTMLElementTagNameMap {
         "checker-board": HTMLCheckerBoardElement;
+        "chess-board": HTMLChessBoardElement;
     }
 }
 declare namespace LocalJSX {
     interface CheckerBoard {
-        "darkSquare"?: string;
-        "lightSquare"?: string;
+        "dark"?: string;
+        "light"?: string;
+    }
+    interface ChessBoard {
+        "dark"?: string;
+        "fen"?: string;
+        "light"?: string;
     }
     interface IntrinsicElements {
         "checker-board": CheckerBoard;
+        "chess-board": ChessBoard;
     }
 }
 export { LocalJSX as JSX };
@@ -36,6 +54,7 @@ declare module "@stencil/core" {
     export namespace JSX {
         interface IntrinsicElements {
             "checker-board": LocalJSX.CheckerBoard & JSXBase.HTMLAttributes<HTMLCheckerBoardElement>;
+            "chess-board": LocalJSX.ChessBoard & JSXBase.HTMLAttributes<HTMLChessBoardElement>;
         }
     }
 }

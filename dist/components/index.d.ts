@@ -1,5 +1,6 @@
 /* cheese custom elements */
 export { Checkerboard as CheckerBoard } from '../types/components/checker-board/checker-board';
+export { ChessBoard as ChessBoard } from '../types/components/chess-board/chess-board';
 
 /**
  * Used to manually set the base path where assets can be found.

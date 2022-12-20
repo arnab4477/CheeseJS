@@ -1,8 +1,9 @@
 import { ComponentDidLoad } from '../../stencil-public-runtime';
-export declare class Checkerboard implements ComponentDidLoad {
+export declare class ChessBoard implements ComponentDidLoad {
   light?: string;
   dark?: string;
-  checkerboardContainer: HTMLElement;
+  fen?: string;
+  chessBoardContainer: HTMLElement;
   componentDidLoad(): void;
   render(): any;
 }
