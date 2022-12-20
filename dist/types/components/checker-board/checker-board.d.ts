@@ -1,9 +1,8 @@
 import { ComponentDidLoad } from '../../stencil-public-runtime';
 export declare class Checkerboard implements ComponentDidLoad {
-  lightSquare: string;
-  darkSquare: string;
+  light?: string;
+  dark?: string;
   checkerboardContainer: HTMLElement;
-  checkerboardHTML: string;
   componentDidLoad(): void;
   render(): any;
 }
