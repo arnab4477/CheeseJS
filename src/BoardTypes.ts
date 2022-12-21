@@ -4,7 +4,7 @@
  * and each column to the files. Each square's uniqie address
  * on the Chess board can be found with `BoardArray[rank][file]
  */
-const BoardArray: string[][] = [
+export const BoardArray: string[][] = [
   ['a8', 'b8', 'c8', 'd8', 'e8', 'f8', 'g8', 'h8'],
   ['a7', 'b7', 'c7', 'd7', 'e7', 'f7', 'g7', 'h7'],
   ['a6', 'b6', 'c6', 'd6', 'e6', 'f6', 'g6', 'h6'],
@@ -14,4 +14,45 @@ const BoardArray: string[][] = [
   ['a2', 'b2', 'c2', 'd2', 'e2', 'f2', 'g2', 'h2'],
   ['a1', 'b1', 'c1', 'd1', 'e1', 'f1', 'g1', 'h1'],
 ];
-export default BoardArray;
+
+/**
+ * Type for the ranks of each file
+ */
+export interface rankType {
+  [rank: string]: string;
+}
+
+/**
+ * Type for the object representation of a Chess board
+ */
+export interface boardType {
+  [file: string]: rankType;
+}
+
+/**
+ * Object representation of ranks of each file
+ */
+const rankMap: rankType = {
+  '1': '',
+  '2': '',
+  '3': '',
+  '4': '',
+  '5': '',
+  '6': '',
+  '7': '',
+  '8': '',
+};
+
+/**
+ * Object representation of a Chess board
+ */
+export const BoardMap: boardType = {
+  a: rankMap,
+  b: rankMap,
+  c: rankMap,
+  d: rankMap,
+  e: rankMap,
+  f: rankMap,
+  g: rankMap,
+  h: rankMap,
+};

@@ -1,4 +1,4 @@
-import BoardArray from '../BoardArray';
+import { BoardArray } from '../BoardTypes';
 import { getPieceImage } from '../pieces/pieceUtils';
 
 // to learn about FEN stings, visit: https://www.chess.com/terms/fen-chess
