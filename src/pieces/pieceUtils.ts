@@ -1,4 +1,5 @@
 import { PieceType } from './pieceTypes';
+import { BoardMap, BoardArray, boardType } from '../BoardTypes';
 
 /**
  * getPieceImage takes a piece type and color and returns the corresponding symbol for the piece,
@@ -63,4 +64,47 @@ export const getPieceImage = (
     default:
       return '';
   }
+};
+
+/**
+ * fenToBoardMap takes one optional input
+ * @param fen : an FEN string of a vlid Chess position. If no FEN
+ * os provided then uses the FEN for the starting position and
+ * @returns an object representation of a Chess board and places pieces
+ * according to the FEN
+ */
+export const fenToBoardMap = (
+  fen: string = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'
+): boardType => {
+  const rows: string[] = fen.split('/');
+
+  // create a copy of the BoardMap
+  const board: boardType = { ...BoardMap };
+  let piece: string = '';
+
+  // Iterate over the ranks and files of the Chess board array
+  for (let rank = 0; rank < BoardArray.length; rank++) {
+    for (let file = 0; file < BoardArray.length; file++) {
+      piece = rows[rank][file];
+
+      // Each square is a 2 character string, like 'a1'
+      // The following code will extract the file and rank out of each square
+      let currentSquare: string = BoardArray[rank][file];
+      let currentFile: string = currentSquare[0];
+      let currentRank: string = currentSquare[1];
+
+      // if the piece is a character, it is a piece
+      if (typeof piece === 'string' && piece.match(/[a-zA-Z]/)) {
+        board[currentFile][currentRank] = piece;
+      } else if (typeof parseInt(piece) === 'number') {
+        // If the piece is a number then it is the number of empty squares
+        // Sp ;oop through the array and increment the file to leave out the empty squares
+        for (let empties = 0; empties < parseInt(piece); empties++) {
+          file++;
+        }
+      }
+    }
+  }
+
+  return board;
 };
