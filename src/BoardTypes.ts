@@ -16,43 +16,95 @@ export const BoardArray: string[][] = [
 ];
 
 /**
- * Type for the ranks of each file
+ * Type for an object representation of a hess board
  */
-export interface rankType {
-  [rank: string]: string;
+export interface BoardType {
+  [file: string]: {
+    [rank: string]: string;
+  };
 }
-
-/**
- * Type for the object representation of a Chess board
- */
-export interface boardType {
-  [file: string]: rankType;
-}
-
-/**
- * Object representation of ranks of each file
- */
-const rankMap: rankType = {
-  '1': '',
-  '2': '',
-  '3': '',
-  '4': '',
-  '5': '',
-  '6': '',
-  '7': '',
-  '8': '',
-};
-
 /**
  * Object representation of a Chess board
  */
-export const BoardMap: boardType = {
-  a: rankMap,
-  b: rankMap,
-  c: rankMap,
-  d: rankMap,
-  e: rankMap,
-  f: rankMap,
-  g: rankMap,
-  h: rankMap,
+export const BoardMap: BoardType = {
+  a: {
+    '1': '',
+    '2': '',
+    '3': '',
+    '4': '',
+    '5': '',
+    '6': '',
+    '7': '',
+    '8': '',
+  },
+  b: {
+    '1': '',
+    '2': '',
+    '3': '',
+    '4': '',
+    '5': '',
+    '6': '',
+    '7': '',
+    '8': '',
+  },
+  c: {
+    '1': '',
+    '2': '',
+    '3': '',
+    '4': '',
+    '5': '',
+    '6': '',
+    '7': '',
+    '8': '',
+  },
+  d: {
+    '1': '',
+    '2': '',
+    '3': '',
+    '4': '',
+    '5': '',
+    '6': '',
+    '7': '',
+    '8': '',
+  },
+  e: {
+    '1': '',
+    '2': '',
+    '3': '',
+    '4': '',
+    '5': '',
+    '6': '',
+    '7': '',
+    '8': '',
+  },
+  f: {
+    '1': '',
+    '2': '',
+    '3': '',
+    '4': '',
+    '5': '',
+    '6': '',
+    '7': '',
+    '8': '',
+  },
+  g: {
+    '1': '',
+    '2': '',
+    '3': '',
+    '4': '',
+    '5': '',
+    '6': '',
+    '7': '',
+    '8': '',
+  },
+  h: {
+    '1': '',
+    '2': '',
+    '3': '',
+    '4': '',
+    '5': '',
+    '6': '',
+    '7': '',
+    '8': '',
+  },
 };

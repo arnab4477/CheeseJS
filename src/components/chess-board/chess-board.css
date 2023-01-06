@@ -32,7 +32,7 @@
 }
 
 @media (max-width: 550px) {
-  #analysis-board-container {
+  #chess-board-container {
     width: 280px;
     height: 280px;
   }
