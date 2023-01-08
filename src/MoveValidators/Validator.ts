@@ -68,6 +68,10 @@ class Validator {
         return this.validateRookMove(origin, dest, `w`);
       case 'r':
         return this.validateRookMove(origin, dest, `b`);
+      case `B`:
+        return this.validateBishopMove(origin, dest, `w`);
+      case 'b':
+        return this.validateBishopMove(origin, dest, `b`);
       default:
         return true;
     }
@@ -167,6 +171,57 @@ class Validator {
   }
 
   /**
+   * Validator method for the Bishop that checks if
+   * the square the Bishop is trying to move to is legal.
+   * As of now it does not check for any special rules (like moving
+   * while being pinned)
+   */
+  private validateBishopMove(
+    origin: string,
+    dest: string,
+    color: string
+  ): boolean {
+    // Get the file and rank information and check they are correct
+    const fileAndRankArray = helpers.getOriginAndDestInfo(origin, dest);
+    if (fileAndRankArray.includes(null)) {
+      console.log('invalid square input');
+      return false;
+    }
+
+    // Get the information of the origin and destination squares and their differences
+    const [originFile, originRank, destFile, destRank] = fileAndRankArray;
+    const [fileDifference, rankDifference] = helpers.getFileAndRankDifferences(
+      originFile,
+      originRank,
+      destFile,
+      destRank
+    );
+
+    // If the move is not diagonal then it is an illegal move
+    if (fileDifference !== rankDifference) {
+      return false;
+    }
+
+    // See if there is any piece on the way
+    const objectedSquareInfo = helpers.checkThroughDiagonals(
+      originFile,
+      destFile,
+      originRank,
+      destRank,
+      this.boardMap
+    );
+
+    // If the piece's color is same as the Bishop
+    // then the Bishop cannot move through/to it
+    if (color === objectedSquareInfo.color) {
+      return false;
+    }
+
+    // if none of checks returned false, that means the move is valid
+    return true;
+  }
+
+  /**
    * Validator method for the Rook that checks if
    * the square the Rook is trying to move to is legal.
    * As of now it does not check for any special rules (like moving
@@ -204,7 +259,7 @@ class Validator {
       );
 
       // If the piece's color is same as the Rook
-      // then the Queen cannot move through/to it
+      // then the Rook cannot move through/to it
       if (color === objectedSquareInfo.color) {
         return false;
       }
@@ -220,7 +275,7 @@ class Validator {
       );
 
       // If the piece's color is same as the Rook
-      // then the Queen cannot move through/to it
+      // then the Rook cannot move through/to it
       if (color === objectedSquareInfo.color) {
         return false;
       }

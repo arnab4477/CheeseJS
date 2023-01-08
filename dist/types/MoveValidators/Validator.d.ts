@@ -32,6 +32,13 @@ declare class Validator {
    */
   private validateQueenMove;
   /**
+   * Validator method for the Bishop that checks if
+   * the square the Bishop is trying to move to is legal.
+   * As of now it does not check for any special rules (like moving
+   * while being pinned)
+   */
+  private validateBishopMove;
+  /**
    * Validator method for the Rook that checks if
    * the square the Rook is trying to move to is legal.
    * As of now it does not check for any special rules (like moving
