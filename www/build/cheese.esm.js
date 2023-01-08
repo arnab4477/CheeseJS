@@ -125,5 +125,5 @@ const patchCloneNodeFix = (HTMLElementPrototype) => {
 
 patchBrowser().then(options => {
   globalScripts();
-  return bootstrapLazy([["checker-board",[[1,"checker-board",{"light":[1025],"dark":[1025]}]]],["chess-board",[[1,"chess-board",{"light":[1025],"dark":[1025],"fen":[1025]}]]]], options);
+  return bootstrapLazy([["analysis-board",[[1,"analysis-board",{"light":[1025],"dark":[1025]}]]],["checker-board",[[1,"checker-board",{"light":[1025],"dark":[1025]}]]],["chess-board",[[1,"chess-board",{"light":[1025],"dark":[1025],"fen":[1025]}]]]], options);
 });

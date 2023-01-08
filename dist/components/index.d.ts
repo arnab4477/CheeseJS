@@ -1,4 +1,5 @@
 /* cheese custom elements */
+export { AnalysisBoard as AnalysisBoard } from '../types/components/analysis-board/analysis-board';
 export { Checkerboard as CheckerBoard } from '../types/components/checker-board/checker-board';
 export { ChessBoard as ChessBoard } from '../types/components/chess-board/chess-board';
 

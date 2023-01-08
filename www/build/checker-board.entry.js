@@ -1,5 +1,5 @@
 import { r as registerInstance, h } from './index-96fdd9b9.js';
-import { B as BoardArray } from './BoardArray-e64c4a8b.js';
+import { a as BoardArray } from './BoardTypes-d86232b4.js';
 
 /**
  * generateCheckeredBoard is a function that takes two required arguments:

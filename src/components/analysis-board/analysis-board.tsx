@@ -1,33 +1,35 @@
 import { Component, Prop, h, ComponentDidLoad } from '@stencil/core';
 import { generateChessBoard } from '../../utils/chessboard';
+import Validator from '../../MoveValidators/Validator';
 
 @Component({
-  tag: 'chess-board',
-  styleUrl: 'chess-board.css',
+  tag: 'analysis-board',
+  styleUrl: 'analysis-board.css',
   shadow: true,
 })
-export class ChessBoard implements ComponentDidLoad {
-  // Component properties for the square colors and the FEN string
+export class AnalysisBoard implements ComponentDidLoad {
+  // Component properties for the square colors
   @Prop({ mutable: true }) light?: string = 'white';
   @Prop({ mutable: true }) dark?: string = 'black';
-  @Prop({ mutable: true }) fen?: string =
-    'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR';
 
   // A reference to the checkerboard container element
-  chessBoardContainer: HTMLElement;
+  analysisBoardContainer: HTMLElement;
+
+  // An instance of the Validator class for move validation
+  validator = new Validator();
 
   // This method is called when the component has finished loading
   componentDidLoad() {
     // Set the inner HTML of the checkerboard container to the HTML string for the checkered board
-    this.chessBoardContainer.innerHTML = generateChessBoard(
+    this.analysisBoardContainer.innerHTML = generateChessBoard(
       this.light,
       this.dark,
-      this.fen
+      'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'
     );
 
     // Get all the pieces and squares in the chess board
-    const pieces = this.chessBoardContainer.querySelectorAll('.piece');
-    const squares = this.chessBoardContainer.querySelectorAll('.square');
+    const pieces = this.analysisBoardContainer.querySelectorAll('.piece');
+    const squares = this.analysisBoardContainer.querySelectorAll('.square');
 
     // Add drag and drop event listeners to each piece
     pieces.forEach((piece) => {
@@ -53,10 +55,30 @@ export class ChessBoard implements ComponentDidLoad {
       // When a piece is dropped on a square, append the piece to the square and clear the square's inner HTML
       square.addEventListener('drop', (e) => {
         e.preventDefault();
+
+        // Get the HTML element being dragged
         const pieceBeingDragged =
-          this.chessBoardContainer.querySelector('.dragging');
-        square.innerHTML = '';
-        square.appendChild(pieceBeingDragged);
+          this.analysisBoardContainer.querySelector('.dragging');
+
+        // Get the info for the piece, its origin and destination square
+        const originSquare = pieceBeingDragged.parentElement.id;
+        const destSquare = square.id;
+        const piece = pieceBeingDragged.id;
+
+        // Validate the move
+        const isValid: boolean = this.validator.ValidateMove(
+          originSquare,
+          destSquare,
+          piece
+        );
+
+        if (isValid) {
+          // Call the NewMove() ,ethod to update the game states
+          this.validator.NewMove();
+          square.innerHTML = '';
+          square.appendChild(pieceBeingDragged);
+        }
+        return;
       });
     });
   }
@@ -64,8 +86,8 @@ export class ChessBoard implements ComponentDidLoad {
   render() {
     return (
       <div
-        ref={(el) => (this.chessBoardContainer = el as HTMLElement)}
-        id="chess-board-container"
+        ref={(el) => (this.analysisBoardContainer = el as HTMLElement)}
+        id="analysis-board-container"
       ></div>
     );
   }
