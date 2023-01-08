@@ -26,10 +26,17 @@ declare class Validator {
   ValidateMove(origin: string, dest: string, piece: string): boolean;
   /**
    * Validator method for the Queen that checks if
-   * the sqyare the Queen is trying to move to is legal.
+   * the square the Queen is trying to move to is legal.
    * As of now it does not check for any special rules (like moving
-   * while pinned)
+   * while being pinned)
    */
   private validateQueenMove;
+  /**
+   * Validator method for the Rook that checks if
+   * the square the Rook is trying to move to is legal.
+   * As of now it does not check for any special rules (like moving
+   * while being pinned)
+   */
+  private validateRookMove;
 }
 export default Validator;

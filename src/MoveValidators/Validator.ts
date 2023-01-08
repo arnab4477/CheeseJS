@@ -64,6 +64,10 @@ class Validator {
         return this.validateQueenMove(origin, dest, `w`);
       case 'q':
         return this.validateQueenMove(origin, dest, `b`);
+      case `R`:
+        return this.validateRookMove(origin, dest, `w`);
+      case 'r':
+        return this.validateRookMove(origin, dest, `b`);
       default:
         return true;
     }
@@ -71,9 +75,9 @@ class Validator {
 
   /**
    * Validator method for the Queen that checks if
-   * the sqyare the Queen is trying to move to is legal.
+   * the square the Queen is trying to move to is legal.
    * As of now it does not check for any special rules (like moving
-   * while pinned)
+   * while being pinned)
    */
   private validateQueenMove(
     origin: string,
@@ -118,7 +122,7 @@ class Validator {
         this.boardMap
       );
 
-      // If the piece's color is sane as the Queen
+      // If the piece's color is same as the Queen
       // then the Queen cannot move through/to it
       if (color === objectedSquareInfo.color) {
         return false;
@@ -134,7 +138,7 @@ class Validator {
         this.boardMap
       );
 
-      // If the piece's color is sane as the Queen
+      // If the piece's color is same as the Queen
       // then the Queen cannot move through/to it
       if (color === objectedSquareInfo.color) {
         return false;
@@ -151,7 +155,71 @@ class Validator {
         this.boardMap
       );
 
-      // If the piece's color is sane as the Queen
+      // If the piece's color is same as the Queen
+      // then the Queen cannot move through/to it
+      if (color === objectedSquareInfo.color) {
+        return false;
+      }
+    }
+
+    // if none of checks returned false, that means the move is valid
+    return true;
+  }
+
+  /**
+   * Validator method for the Rook that checks if
+   * the square the Rook is trying to move to is legal.
+   * As of now it does not check for any special rules (like moving
+   * while being pinned)
+   */
+  private validateRookMove(
+    origin: string,
+    dest: string,
+    color: string
+  ): boolean {
+    // Get the file and rank information and check they are correct
+    const fileAndRankArray = helpers.getOriginAndDestInfo(origin, dest);
+    if (fileAndRankArray.includes(null)) {
+      console.log('invalid square input');
+      return false;
+    }
+
+    // Get the information of the origin and destination squares
+    const [originFile, originRank, destFile, destRank] = fileAndRankArray;
+
+    // If the move is neither straight horizontal or vertical
+    // then it is an illegal move
+    if (!(originFile === destFile || originRank === destRank)) {
+      return false;
+    }
+
+    // If The move is along the files (horizontal, like a1 to h1)
+    if (originRank === destRank) {
+      // See if there is any piece on the way
+      const objectedSquareInfo = helpers.checkThroughRank(
+        originFile,
+        destFile,
+        originRank,
+        this.boardMap
+      );
+
+      // If the piece's color is same as the Rook
+      // then the Queen cannot move through/to it
+      if (color === objectedSquareInfo.color) {
+        return false;
+      }
+    }
+    // If the move is along ranks (vertically, like a1 to a8)
+    else if (originFile === destFile) {
+      // See if there is any piece on the way
+      const objectedSquareInfo = helpers.checkThroughFile(
+        originRank,
+        destRank,
+        originFile,
+        this.boardMap
+      );
+
+      // If the piece's color is same as the Rook
       // then the Queen cannot move through/to it
       if (color === objectedSquareInfo.color) {
         return false;
