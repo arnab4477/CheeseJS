@@ -1,16 +1,6 @@
 declare class Validator {
   private boardMap;
-  private canEnPassant;
-  private canWhiteCastle;
-  private canBlackCastle;
-  private castlingRightViolatedWhite;
-  private castlingRightViolatedBlack;
-  private canWhitePromote;
-  private canBlackPromote;
   private whitesTurn;
-  private whiteKingInCheck;
-  private blackKingInCheck;
-  private fiftyMovesRule;
   private movingPiece;
   private movingPiecesOrigin;
   private movingPiecesDest;
@@ -31,6 +21,13 @@ declare class Validator {
    * while being pinned)
    */
   private validateQueenMove;
+  /**
+   * Validator method for the King that checks if
+   * the square the King is trying to move to is legal.
+   * As of now it does not check for any special rules (like moving
+   * to an enemy protected square)
+   */
+  private validateKingMove;
   /**
    * Validator method for the Bishop that checks if
    * the square the Bishop is trying to move to is legal.

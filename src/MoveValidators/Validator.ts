@@ -1,26 +1,13 @@
 import { fenToBoardMap } from '../pieces/pieceUtils';
 import { BoardType } from '../BoardTypes';
 import * as helpers from './validatorHelper';
-
 class Validator {
   // Declarations of properties that will hold various states of the game
   private boardMap: BoardType = fenToBoardMap();
-  private canEnPassant: boolean = false;
-  private canWhiteCastle: boolean = false;
-  private canBlackCastle: boolean = false;
-
-  private castlingRightViolatedWhite: boolean = false;
-  private castlingRightViolatedBlack: boolean = false;
-  private canWhitePromote: boolean = false;
-  private canBlackPromote: boolean = false;
-
   private whitesTurn: boolean = true;
-  private whiteKingInCheck: boolean = false;
-  private blackKingInCheck: boolean = false;
-  private fiftyMovesRule: (number | boolean)[] = [0, false];
-
   private movingPiece: string = '';
   private movingPiecesOrigin: string = '';
+
   private movingPiecesDest: string = '';
   private movingPiecesColor: string = '';
 
@@ -29,12 +16,14 @@ class Validator {
    */
   public NewMove(): void {
     // Update the board map
-    helpers.updateBoardMap(
+    this.boardMap = helpers.updateBoardMap(
       this.movingPiece,
       this.movingPiecesOrigin,
       this.movingPiecesDest,
       this.boardMap
     );
+    console.log(JSON.stringify(this.boardMap));
+    // console.log('Updated');
 
     // Toggle the color's turn
     this.whitesTurn = !this.whitesTurn;
@@ -45,11 +34,10 @@ class Validator {
    function for that piece (urrently only for the Queen) 
   */
   public ValidateMove(origin: string, dest: string, piece: string): boolean {
-    // Set the info of the moving piece to the states
-    this.movingPiece = piece;
+    // console.log(JSON.stringify(this.boardMap));
+    let isValid: boolean = false;
+    let tempHoldColor = this.movingPiecesColor;
     this.movingPiecesColor = helpers.getPieceColor(piece);
-    this.movingPiecesOrigin = origin;
-    this.movingPiecesDest = dest;
 
     // Check if the moving piece matches the appropriate color's turn
     if (this.whitesTurn && this.movingPiecesColor !== 'w') {
@@ -60,21 +48,51 @@ class Validator {
 
     // Run the validator function for the moving piece (currently only Queen)
     switch (piece) {
+      case `K`:
+        isValid = this.validateKingMove(origin, dest, `w`);
+        break;
+      case 'k':
+        isValid = this.validateKingMove(origin, dest, `b`);
+        break;
       case `Q`:
-        return this.validateQueenMove(origin, dest, `w`);
+        isValid = this.validateQueenMove(origin, dest, `w`);
+        break;
       case 'q':
-        return this.validateQueenMove(origin, dest, `b`);
+        isValid = this.validateQueenMove(origin, dest, `b`);
+        break;
       case `R`:
-        return this.validateRookMove(origin, dest, `w`);
-      case 'r':
-        return this.validateRookMove(origin, dest, `b`);
+        isValid = this.validateRookMove(origin, dest, `w`);
+        break;
+      case 'q':
+        isValid = this.validateQueenMove(origin, dest, `b`);
+        break;
+      case `P`:
+        isValid = true;
+        break;
+      case 'p':
+        isValid = true;
+        break;
       case `B`:
-        return this.validateBishopMove(origin, dest, `w`);
+        isValid = this.validateBishopMove(origin, dest, `w`);
       case 'b':
-        return this.validateBishopMove(origin, dest, `b`);
+        isValid = this.validateBishopMove(origin, dest, `b`);
       default:
-        return true;
+        isValid = true;
     }
+
+    if (isValid) {
+      // Set the info of the moving piece to the states
+      this.movingPiece = piece;
+      this.movingPiecesOrigin = origin;
+      this.movingPiecesDest = dest;
+      console.log(isValid);
+      return true;
+    }
+
+    this.movingPiecesColor = tempHoldColor;
+    console.log(isValid);
+
+    return false;
   }
 
   /**
@@ -84,6 +102,34 @@ class Validator {
    * while being pinned)
    */
   private validateQueenMove(
+    origin: string,
+    dest: string,
+    color: string
+  ): boolean {
+    /*
+    The Queen is basically a Rook + a Bishop. So instead of writing
+    a separate validator for the Queen, the same validators for the
+    Rook and the Bishop can be used. If one of them return true then the
+    move is valid,else it is invalid
+     */
+    const IsValidRanksAndFiles = this.validateRookMove(origin, dest, color);
+    const IsValidDiagonals = this.validateBishopMove(origin, dest, color);
+
+    if (!IsValidRanksAndFiles && !IsValidDiagonals) {
+      return false;
+    }
+
+    // if none of checks returned false, that means the move is valid
+    return true;
+  }
+
+  /**
+   * Validator method for the King that checks if
+   * the square the King is trying to move to is legal.
+   * As of now it does not check for any special rules (like moving
+   * to an enemy protected square)
+   */
+  private validateKingMove(
     origin: string,
     dest: string,
     color: string
@@ -104,66 +150,20 @@ class Validator {
       destRank
     );
 
-    // If the move is neither straight horizontal, vertical or diagonal
-    // then it is an illegal move
-    if (
-      !(
-        originFile === destFile ||
-        originRank === destRank ||
-        fileDifference === rankDifference
-      )
-    ) {
+    // If the move is more than one square then it is an illegal move
+    if (fileDifference !== 1 && rankDifference !== 1) {
+      console.log(`${fileDifference}, ${rankDifference}`);
       return false;
     }
 
-    // If The move is along the files (horizontal, like a1 to h1)
-    if (originRank === destRank) {
-      // See if there is any piece on the way
-      const objectedSquareInfo = helpers.checkThroughRank(
-        originFile,
-        destFile,
-        originRank,
-        this.boardMap
-      );
-
-      // If the piece's color is same as the Queen
-      // then the Queen cannot move through/to it
-      if (color === objectedSquareInfo.color) {
-        return false;
-      }
-    }
-    // If the move is along ranks (vertically, like a1 to a8)
-    else if (originFile === destFile) {
-      // See if there is any piece on the way
-      const objectedSquareInfo = helpers.checkThroughFile(
-        originRank,
-        destRank,
-        originFile,
-        this.boardMap
-      );
-
-      // If the piece's color is same as the Queen
-      // then the Queen cannot move through/to it
-      if (color === objectedSquareInfo.color) {
-        return false;
-      }
-    }
-    // If the move is diagonal (like a1 to h8
-    else if (fileDifference === rankDifference) {
-      // See if there is any piece on the way)
-      const objectedSquareInfo = helpers.checkThroughDiagonals(
-        originFile,
-        destFile,
-        originRank,
-        destRank,
-        this.boardMap
-      );
-
-      // If the piece's color is same as the Queen
-      // then the Queen cannot move through/to it
-      if (color === objectedSquareInfo.color) {
-        return false;
-      }
+    /*
+    The King moves exactly like the Queen except for only one square.
+    So, after the one square rule is validated, the Queen's validator can be used
+    for the King's move
+     */
+    const isValidMove = this.validateQueenMove(origin, dest, color);
+    if (!isValidMove) {
+      return false;
     }
 
     // if none of checks returned false, that means the move is valid

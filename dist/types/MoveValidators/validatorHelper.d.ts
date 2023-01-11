@@ -36,10 +36,14 @@ export declare const checkThroughRank: (originFile: string, destFile: string, ra
   color: string;
 };
 /**
+ * Function that checks if the King is in check in any given square
+ */
+export declare const isKingInCheck: (square: string, color: string, boardMap: BoardType) => boolean;
+/**
  * Method that takes the moving piece, its origin and destination
  * square and updates the board accordingly
  */
-export declare const updateBoardMap: (piece: string, origin: string, dest: string, boardMap: BoardType) => void;
+export declare const updateBoardMap: (piece: string, origin: string, dest: string, boardMap: BoardType) => BoardType;
 export declare const getPieceColor: (piece: string) => string;
 /**
  * Method that retrieves the file names and rank numbers from the original

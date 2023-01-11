@@ -27,6 +27,11 @@ export const checkThroughDiagonals = (
   let nextRankNum = originRankNum + 1;
   let prevRankNum = originRankNum - 1;
 
+  const maxFileUnicode = 'h'.charCodeAt(0);
+  const minFileUnicode = 'a'.charCodeAt(0);
+  const maxRankNum = 8;
+  const minRankNum = 1;
+
   // Initialize the return values that will hold the data for the piece and
   // its square
   let square: string = ``;
@@ -35,7 +40,11 @@ export const checkThroughDiagonals = (
 
   // If the piece is going right and up, eg: e5 to h8
   if (destFileUnicode > originFileUnicode && destRankNum > originRankNum) {
-    while (nextFileUnicode <= destFileUnicode || nextRankNum <= destRankNum) {
+    while (
+      (nextFileUnicode <= destFileUnicode &&
+        nextFileUnicode <= maxFileUnicode) ||
+      (nextRankNum <= destRankNum && nextRankNum <= maxRankNum)
+    ) {
       // Get the square and piece data
       square = String.fromCharCode(nextFileUnicode) + nextRankNum.toString();
       piece = boardMap[square[0]][square[1]];
@@ -52,7 +61,11 @@ export const checkThroughDiagonals = (
   }
   // If the piece is going right and down, eg: e5 to h1
   else if (destFileUnicode > originFileUnicode && destRankNum < originRankNum) {
-    while (nextFileUnicode <= destFileUnicode || prevRankNum >= destRankNum) {
+    while (
+      (nextFileUnicode <= destFileUnicode &&
+        nextFileUnicode <= maxFileUnicode) ||
+      (prevRankNum >= destRankNum && prevRankNum >= minRankNum)
+    ) {
       // Get the square and piece data
       square = String.fromCharCode(nextFileUnicode) + prevRankNum.toString();
       piece = boardMap[square[0]][square[1]];
@@ -69,7 +82,11 @@ export const checkThroughDiagonals = (
   }
   // If the piece is going left and up, eg: e5 to a1
   else if (destFileUnicode < originFileUnicode && destRankNum > originRankNum) {
-    while (prevFileUnicode >= destFileUnicode || nextRankNum <= destRankNum) {
+    while (
+      (prevFileUnicode >= destFileUnicode &&
+        prevFileUnicode >= minFileUnicode) ||
+      (nextRankNum <= destRankNum && nextRankNum <= maxRankNum)
+    ) {
       // Get the square and piece data
       square = String.fromCharCode(prevFileUnicode) + nextRankNum.toString();
       piece = boardMap[square[0]][square[1]];
@@ -86,7 +103,11 @@ export const checkThroughDiagonals = (
   }
   // If the piece is going left and down, eg: e5 to h1
   else if (destFileUnicode < originFileUnicode && destRankNum < originRankNum) {
-    while (prevFileUnicode >= destFileUnicode || prevRankNum >= destRankNum) {
+    while (
+      (prevFileUnicode >= destFileUnicode &&
+        prevFileUnicode >= minFileUnicode) ||
+      (prevRankNum >= destRankNum && prevRankNum >= minRankNum)
+    ) {
       // Get the square and piece data
       square = String.fromCharCode(prevFileUnicode) + prevRankNum.toString();
       piece = boardMap[square[0]][square[1]];
@@ -103,6 +124,45 @@ export const checkThroughDiagonals = (
   }
 
   return { square, piece, color };
+};
+
+export const getDiagonalEdge = (
+  square: string,
+  direction: string
+): Array<string> => {
+  console.log(`${square}`);
+  const [file, rank] = getFileAndRank(square);
+  let fileUnicode = file.charCodeAt(0);
+  let rankNum = parseInt(rank);
+
+  const maxFileUnicode = 'h'.charCodeAt(0);
+  const minFileUnicode = 'a'.charCodeAt(0);
+  const maxRank = 8;
+  const minRank = 1;
+
+  if (direction === 'right-up') {
+    while (fileUnicode < maxFileUnicode && rankNum < maxRank) {
+      fileUnicode++;
+      rankNum++;
+    }
+  } else if (direction === 'right-down') {
+    while (fileUnicode < maxFileUnicode && rankNum > minRank) {
+      fileUnicode++;
+      rankNum--;
+    }
+  } else if (direction === 'left-up') {
+    while (fileUnicode > minFileUnicode && rankNum < maxRank) {
+      fileUnicode--;
+      rankNum++;
+    }
+  } else if (direction === 'left-down') {
+    while (fileUnicode > minFileUnicode && rankNum > minRank) {
+      fileUnicode--;
+      rankNum--;
+    }
+  }
+
+  return [String.fromCharCode(fileUnicode), rankNum.toFixed()];
 };
 
 /**
@@ -158,16 +218,23 @@ export const checkThroughFile = (
       piece = boardMap[square[0]][square[1]];
       color = getPieceColor(piece);
 
-      if (piece === '') {
+      if (square[1] === '1') {
+        // If there is no piece on the way
+        console.log('fuck 1');
+        break;
+      } else if (piece === '') {
+        console.log('fuck 2');
+
         // If there is no piece on the way
         continue;
       } else {
         // This means there is a piece on the way
+        console.log('fuck 3');
         break;
       }
     }
   }
-
+  console.log('return ' + square);
   return { square, piece, color };
 };
 
@@ -245,6 +312,78 @@ export const checkThroughRank = (
 };
 
 /**
+ * Function that takes two squares and checks if they are adjacent
+ * to one another, either vertically, horizontally or diagonally
+ */
+export const isAdjacent = (
+  originSquare: string,
+  objectedSquare: string
+): boolean => {
+  // get the info foof the origin and objected square
+  console.log(`${objectedSquare} gee`);
+  const [originFile, originRank, objectedFile, objectedRank] =
+    getOriginAndDestInfo(originSquare, objectedSquare);
+  const [fileDifference, rankDifference] = getFileAndRankDifferences(
+    originFile,
+    originRank,
+    objectedFile,
+    objectedRank
+  );
+
+  // Check if theyare diagonally adjaent
+  if (fileDifference === rankDifference && fileDifference === 1) {
+    return true;
+  }
+
+  // If they are on the same file
+  if (originFile === objectedFile) {
+    if (Math.abs(parseInt(originRank) - parseInt(objectedRank)) === 1) {
+      return true;
+    }
+  }
+  // If they are on the same rank
+  else if (originRank === objectedRank) {
+    if (Math.abs(originFile.charCodeAt(0) - objectedFile.charCodeAt(0)) === 1) {
+      return true;
+    }
+  }
+
+  console.log('not next');
+  // If none of the checks returned true that means the squares are not adjacent
+  return false;
+};
+
+/**
+ * Function that takes information about the King, and an array
+ * of enemy pieces and checks if those pieces can give a check to
+ * the King
+ */
+export const evaluateCheck = (
+  objectedPiece: string,
+  ownPieceColor: string,
+  objectedPieceColor: string,
+  enemyWhitePieces: Array<string>,
+  enemyBlackPieces: Array<string>
+): boolean => {
+  // This means there is an own piece before enemy one, so not check
+  if (objectedPieceColor === ownPieceColor) {
+    return false;
+  }
+
+  // Check if the objected piece is in the list of pieces that
+  // can give the King a check
+  if (ownPieceColor === 'w' && enemyBlackPieces.includes(objectedPiece)) {
+    return true;
+  } else if (
+    ownPieceColor === 'b' &&
+    enemyWhitePieces.includes(objectedPiece)
+  ) {
+    return true;
+  }
+  return false;
+};
+
+/**
  * Method that takes the moving piece, its origin and destination
  * square and updates the board accordingly
  */
@@ -253,15 +392,19 @@ export const updateBoardMap = (
   origin: string,
   dest: string,
   boardMap: BoardType
-): void => {
+): BoardType => {
   const [originFile, originRank, destFile, destRank] = getOriginAndDestInfo(
     origin,
     dest
   );
 
+  let boardMapToUpdate = { ...boardMap };
+
   // Empty and original square and place the piece on the destination square
-  boardMap[originFile][originRank] = '';
-  boardMap[destFile][destRank] = piece;
+  boardMapToUpdate[originFile][originRank] = '';
+  boardMapToUpdate[destFile][destRank] = piece;
+
+  return boardMapToUpdate;
 };
 
 export const getPieceColor = (piece: string): string => {
@@ -296,6 +439,7 @@ export const getFileAndRankDifferences = (
   destFile,
   destRank
 ): Array<number> => {
+  console.log(`${destFile} ${destRank}`);
   const fileDifference: number = Math.abs(
     originFile.charCodeAt(0) - destFile.charCodeAt(0)
   );
