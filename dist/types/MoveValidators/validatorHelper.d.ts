@@ -12,6 +12,11 @@ export declare const checkThroughDiagonals: (originFile: string, destFile: strin
   color: string;
 };
 /**
+ * Function that returns diagonal edge square information according to the given
+ * direction
+ */
+export declare const getDiagonalEdge: (square: string, direction: string) => Array<string>;
+/**
  * Validator method that checks if another piece is on the way when the
  * given piece is moving through one file and multiple ranks (moving
  * vertically). Then the method returns the data of the obstructing piece
@@ -36,9 +41,16 @@ export declare const checkThroughRank: (originFile: string, destFile: string, ra
   color: string;
 };
 /**
- * Function that checks if the King is in check in any given square
+ * Function that takes two squares and checks if they are adjacent
+ * to one another, either vertically, horizontally or diagonally
  */
-export declare const isKingInCheck: (square: string, color: string, boardMap: BoardType) => boolean;
+export declare const isAdjacent: (originSquare: string, objectedSquare: string) => boolean;
+/**
+ * Function that takes information about the King, and an array
+ * of enemy pieces and checks if those pieces can give a check to
+ * the King
+ */
+export declare const evaluateCheck: (objectedPiece: string, ownPieceColor: string, objectedPieceColor: string, enemyWhitePieces: Array<string>, enemyBlackPieces: Array<string>) => boolean;
 /**
  * Method that takes the moving piece, its origin and destination
  * square and updates the board accordingly

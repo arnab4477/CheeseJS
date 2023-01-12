@@ -8,7 +8,7 @@ declare class Validator {
   /**
    * Method to run after each move that updates the game's various states
    */
-  NewMove(): void;
+  private NewMove;
   /**
    Validator method that takes in a piece and runs the corresponding validator
    function for that piece (urrently only for the Queen)

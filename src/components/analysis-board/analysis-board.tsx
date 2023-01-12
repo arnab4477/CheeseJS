@@ -73,8 +73,6 @@ export class AnalysisBoard implements ComponentDidLoad {
         );
 
         if (isValid) {
-          // Call the NewMove() ,ethod to update the game states
-          this.validator.NewMove();
           square.innerHTML = '';
           square.appendChild(pieceBeingDragged);
         }

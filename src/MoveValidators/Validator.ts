@@ -1,6 +1,7 @@
 import { fenToBoardMap } from '../pieces/pieceUtils';
 import { BoardType } from '../BoardTypes';
 import * as helpers from './validatorHelper';
+import { isCheck } from './check';
 class Validator {
   // Declarations of properties that will hold various states of the game
   private boardMap: BoardType = fenToBoardMap();
@@ -14,7 +15,7 @@ class Validator {
   /**
    * Method to run after each move that updates the game's various states
    */
-  public NewMove(): void {
+  private NewMove(): void {
     // Update the board map
     this.boardMap = helpers.updateBoardMap(
       this.movingPiece,
@@ -22,8 +23,6 @@ class Validator {
       this.movingPiecesDest,
       this.boardMap
     );
-    console.log(JSON.stringify(this.boardMap));
-    // console.log('Updated');
 
     // Toggle the color's turn
     this.whitesTurn = !this.whitesTurn;
@@ -74,8 +73,10 @@ class Validator {
         break;
       case `B`:
         isValid = this.validateBishopMove(origin, dest, `w`);
+        break;
       case 'b':
         isValid = this.validateBishopMove(origin, dest, `b`);
+        break;
       default:
         isValid = true;
     }
@@ -85,12 +86,12 @@ class Validator {
       this.movingPiece = piece;
       this.movingPiecesOrigin = origin;
       this.movingPiecesDest = dest;
-      console.log(isValid);
+
+      this.NewMove();
       return true;
     }
 
     this.movingPiecesColor = tempHoldColor;
-    console.log(isValid);
 
     return false;
   }
@@ -152,7 +153,6 @@ class Validator {
 
     // If the move is more than one square then it is an illegal move
     if (fileDifference !== 1 && rankDifference !== 1) {
-      console.log(`${fileDifference}, ${rankDifference}`);
       return false;
     }
 
@@ -163,6 +163,10 @@ class Validator {
      */
     const isValidMove = this.validateQueenMove(origin, dest, color);
     if (!isValidMove) {
+      return false;
+    }
+
+    if (isCheck(dest, color, this.boardMap)) {
       return false;
     }
 
@@ -216,6 +220,8 @@ class Validator {
     if (color === objectedSquareInfo.color) {
       return false;
     }
+
+    // console.log('vushio');
 
     // if none of checks returned false, that means the move is valid
     return true;

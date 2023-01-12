@@ -14,6 +14,17 @@ export const checkThroughDiagonals = (
   destRank: string,
   boardMap: BoardType
 ): { square: string; piece: string; color: string } => {
+  // Initialize the return values that will hold the data for the piece and
+  // its square
+  let square: string = ``;
+  let piece: string = ``;
+  let color: string = ``;
+
+  // If the destination is same as the origin, return the origin
+  if (originFile === destFile && originRank === destRank) {
+    return { square: originFile + originRank, piece, color };
+  }
+
   // Convert the files to unicode and the ranks to numbers
   let originFileUnicode = originFile.charCodeAt(0);
   let destFileUnicode = destFile.charCodeAt(0);
@@ -27,16 +38,11 @@ export const checkThroughDiagonals = (
   let nextRankNum = originRankNum + 1;
   let prevRankNum = originRankNum - 1;
 
+  // Set the values for the max and min files and ranks
   const maxFileUnicode = 'h'.charCodeAt(0);
   const minFileUnicode = 'a'.charCodeAt(0);
   const maxRankNum = 8;
   const minRankNum = 1;
-
-  // Initialize the return values that will hold the data for the piece and
-  // its square
-  let square: string = ``;
-  let piece: string = ``;
-  let color: string = ``;
 
   // If the piece is going right and up, eg: e5 to h8
   if (destFileUnicode > originFileUnicode && destRankNum > originRankNum) {
@@ -126,6 +132,10 @@ export const checkThroughDiagonals = (
   return { square, piece, color };
 };
 
+/**
+ * Function that returns diagonal edge square information according to the given
+ * direction
+ */
 export const getDiagonalEdge = (
   square: string,
   direction: string
@@ -178,6 +188,16 @@ export const checkThroughFile = (
   file: string,
   boardMap: BoardType
 ): { square: string; piece: string; color: string } => {
+  // Initialize the return values that will hold the data for the piece and
+  // its square
+  let square: string = ``;
+  let piece: string = ``;
+  let color: string = ``;
+
+  // If the destination is same as the origin, return the origin
+  if (originRank === destRank) {
+    return { square: file + originRank, piece, color };
+  }
   // Convert the rank characters to numbers
   const originRankNum = parseInt(originRank);
   const destRankNum = parseInt(destRank);
@@ -186,12 +206,6 @@ export const checkThroughFile = (
   // from the starting rank to look from the next or previous rank respectively
   let nextRank = originRankNum + 1;
   let prevRank = originRankNum - 1;
-
-  // Initialize the return values that will hold the data for the piece and
-  // its square
-  let square: string = ``;
-  let piece: string = ``;
-  let color: string = ``;
 
   // If the piece is moving up (eg: a1 to a8)
   if (originRankNum < destRankNum) {
@@ -218,23 +232,16 @@ export const checkThroughFile = (
       piece = boardMap[square[0]][square[1]];
       color = getPieceColor(piece);
 
-      if (square[1] === '1') {
-        // If there is no piece on the way
-        console.log('fuck 1');
-        break;
-      } else if (piece === '') {
-        console.log('fuck 2');
-
+      if (piece === '') {
         // If there is no piece on the way
         continue;
       } else {
         // This means there is a piece on the way
-        console.log('fuck 3');
         break;
       }
     }
   }
-  console.log('return ' + square);
+
   return { square, piece, color };
 };
 
@@ -251,6 +258,17 @@ export const checkThroughRank = (
   rank: string,
   boardMap: BoardType
 ): { square: string; piece: string; color: string } => {
+  // Initialize the return values that will hold the data for the piece and
+  // its square
+  let square: string = ``;
+  let piece: string = ``;
+  let color: string = ``;
+
+  // If the destination is same as the origin, return the origin
+  if (originFile === destFile && boardMap) {
+    return { square: originFile + rank, piece, color };
+  }
+
   // Get the unicode value of the files
   let originFileUnicode: number = originFile.charCodeAt(0);
   let destFileUnicode: number = destFile.charCodeAt(0);
@@ -259,12 +277,6 @@ export const checkThroughRank = (
   // from the starting file to look from the next or previous file respectively
   let nextFileUnicode: number = originFileUnicode + 1;
   let prevFileUnicode: number = originFileUnicode - 1;
-
-  // Initialize the return values that will hold the data for the piece and
-  // its square
-  let square: string = ``;
-  let piece: string = ``;
-  let color: string = ``;
 
   // If the piece is moving from left to right (eg: a1 to h1)
   if (originFileUnicode < destFileUnicode) {
@@ -319,8 +331,7 @@ export const isAdjacent = (
   originSquare: string,
   objectedSquare: string
 ): boolean => {
-  // get the info foof the origin and objected square
-  console.log(`${objectedSquare} gee`);
+  // Get the info of the origin and objected square
   const [originFile, originRank, objectedFile, objectedRank] =
     getOriginAndDestInfo(originSquare, objectedSquare);
   const [fileDifference, rankDifference] = getFileAndRankDifferences(
@@ -348,7 +359,6 @@ export const isAdjacent = (
     }
   }
 
-  console.log('not next');
   // If none of the checks returned true that means the squares are not adjacent
   return false;
 };
@@ -380,6 +390,8 @@ export const evaluateCheck = (
   ) {
     return true;
   }
+
+  // If none of the checks returned true, then there is no check
   return false;
 };
 
@@ -439,7 +451,6 @@ export const getFileAndRankDifferences = (
   destFile,
   destRank
 ): Array<number> => {
-  console.log(`${destFile} ${destRank}`);
   const fileDifference: number = Math.abs(
     originFile.charCodeAt(0) - destFile.charCodeAt(0)
   );
