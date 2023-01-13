@@ -122,7 +122,6 @@ const checkThroughDiagonals = (originFile, destFile, originRank, destRank, board
  * direction
  */
 const getDiagonalEdge = (square, direction) => {
-  console.log(`${square}`);
   const [file, rank] = getFileAndRank(square);
   let fileUnicode = file.charCodeAt(0);
   let rankNum = parseInt(rank);
@@ -273,6 +272,26 @@ const checkThroughRank = (originFile, destFile, rank, boardMap) => {
         break;
       }
     }
+  }
+  return { square, piece, color };
+};
+const checkKnightMove = (originFile, originRank, destFile, destRank, boardMap) => {
+  // Initialize the return values that will hold the data for the piece and
+  // its square
+  let square = ``;
+  let piece = ``;
+  let color = ``;
+  // If the destination is same as the origin, return the origin
+  if (originFile === destFile && originRank === destRank) {
+    console.log(`invalid 1 ${square}, ${piece}. ${color}`);
+    return { square: originFile + originRank, piece, color };
+  }
+  const [fileDifference, rankDifference] = getFileAndRankDifferences(originFile, originRank, destFile, destRank);
+  if ((fileDifference === 1 && rankDifference === 2) ||
+    (fileDifference === 2 && rankDifference === 1)) {
+    square = destFile + destRank;
+    piece = boardMap[destFile][destRank];
+    color = getPieceColor(piece);
   }
   return { square, piece, color };
 };
@@ -552,10 +571,12 @@ class Validator {
    function for that piece (urrently only for the Queen)
   */
   ValidateMove(origin, dest, piece) {
-    // console.log(JSON.stringify(this.boardMap));
-    let isValid = false;
+    // Tempporarily change the movingPieceColor to the moving piece's color
+    // If the move is invalid, thecolor will be changed back to the previous one
+    // tempHoldColor holds the previous color value
     let tempHoldColor = this.movingPiecesColor;
     this.movingPiecesColor = getPieceColor(piece);
+    let isValid = false;
     // Check if the moving piece matches the appropriate color's turn
     if (this.whitesTurn && this.movingPiecesColor !== 'w') {
       return false;
@@ -595,6 +616,12 @@ class Validator {
       case 'b':
         isValid = this.validateBishopMove(origin, dest, `b`);
         break;
+      case 'N':
+        isValid = this.validateKnightMove(origin, dest, `w`);
+        break;
+      case 'n':
+        isValid = this.validateKnightMove(origin, dest, `b`);
+        break;
       default:
         isValid = true;
     }
@@ -603,11 +630,46 @@ class Validator {
       this.movingPiece = piece;
       this.movingPiecesOrigin = origin;
       this.movingPiecesDest = dest;
+      // Call the NewMove method to update the game's states
       this.NewMove();
       return true;
     }
+    // If none of the checks returned true, that means that the move is invalid
+    // Change the movingPieeColor's value to the previous color
     this.movingPiecesColor = tempHoldColor;
     return false;
+  }
+  /**
+   * Validator method for the QueeKnight that checks if
+   * the square the Knoght is trying to move to is legal.
+   * As of now it does not check for any special rules (like moving
+   * while being pinned)
+   */
+  validateKnightMove(origin, dest, color) {
+    // Get the file and rank information and check they are correct
+    const fileAndRankArray = getOriginAndDestInfo(origin, dest);
+    if (fileAndRankArray.includes(null)) {
+      console.log('invalid square input');
+      return false;
+    }
+    // Get the information of the origin and destination squares
+    const [originFile, originRank, destFile, destRank] = fileAndRankArray;
+    const [fileDifference, rankDifference] = getFileAndRankDifferences(originFile, originRank, destFile, destRank);
+    // Check that the Knight can only move in an L shape
+    if (!((fileDifference === 1 && rankDifference === 2) ||
+      (fileDifference === 2 && rankDifference === 1))) {
+      return false;
+    }
+    // Check if thereis any piece on the destination square
+    // and get its color
+    const destPieceColor = getPieceColor(this.boardMap[originFile][originRank]);
+    // If the obected piece's color is same as the Knight
+    // then the Knight cannot move /to it
+    if (color === destPieceColor) {
+      return false;
+    }
+    // if none of checks returned false, that means the move is valid
+    return true;
   }
   /**
    * Validator method for the Queen that checks if

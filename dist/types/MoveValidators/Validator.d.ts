@@ -15,6 +15,13 @@ declare class Validator {
   */
   ValidateMove(origin: string, dest: string, piece: string): boolean;
   /**
+   * Validator method for the QueeKnight that checks if
+   * the square the Knoght is trying to move to is legal.
+   * As of now it does not check for any special rules (like moving
+   * while being pinned)
+   */
+  private validateKnightMove;
+  /**
    * Validator method for the Queen that checks if
    * the square the Queen is trying to move to is legal.
    * As of now it does not check for any special rules (like moving
