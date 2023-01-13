@@ -122,7 +122,6 @@ const checkThroughDiagonals = (originFile, destFile, originRank, destRank, board
  * direction
  */
 const getDiagonalEdge = (square, direction) => {
-  console.log(`${square}`);
   const [file, rank] = getFileAndRank(square);
   let fileUnicode = file.charCodeAt(0);
   let rankNum = parseInt(rank);
@@ -276,6 +275,26 @@ const checkThroughRank = (originFile, destFile, rank, boardMap) => {
   }
   return { square, piece, color };
 };
+const checkKnightMove = (originFile, originRank, destFile, destRank, boardMap) => {
+  // Initialize the return values that will hold the data for the piece and
+  // its square
+  let square = ``;
+  let piece = ``;
+  let color = ``;
+  // If the destination is same as the origin, return the origin
+  if (originFile === destFile && originRank === destRank) {
+    console.log(`invalid 1 ${square}, ${piece}. ${color}`);
+    return { square: originFile + originRank, piece, color };
+  }
+  const [fileDifference, rankDifference] = getFileAndRankDifferences(originFile, originRank, destFile, destRank);
+  if ((fileDifference === 1 && rankDifference === 2) ||
+    (fileDifference === 2 && rankDifference === 1)) {
+    square = destFile + destRank;
+    piece = boardMap[destFile][destRank];
+    color = getPieceColor(piece);
+  }
+  return { square, piece, color };
+};
 /**
  * Function that takes two squares and checks if they are adjacent
  * to one another, either vertically, horizontally or diagonally
@@ -333,6 +352,16 @@ const updateBoardMap = (piece, origin, dest, boardMap) => {
   const [originFile, originRank, destFile, destRank] = getOriginAndDestInfo(origin, dest);
   let boardMapToUpdate = Object.assign({}, boardMap);
   // Empty and original square and place the piece on the destination square
+  // let boardMapToUpdate = {
+  //   ...boardMap,
+  //   originFile: {
+  //     originRank: '',
+  //   },
+  //   destFile: {
+  //     destRank: piece,
+  //   },
+  // };
+  // // Empty and original square and place the piece on the destination square
   boardMapToUpdate[originFile][originRank] = '';
   boardMapToUpdate[destFile][destRank] = piece;
   return boardMapToUpdate;
@@ -543,7 +572,8 @@ class Validator {
    */
   NewMove() {
     // Update the board map
-    this.boardMap = updateBoardMap(this.movingPiece, this.movingPiecesOrigin, this.movingPiecesDest, this.boardMap);
+    const updatedBoardMap = updateBoardMap(this.movingPiece, this.movingPiecesOrigin, this.movingPiecesDest, this.boardMap);
+    this.boardMap = Object.assign({}, updatedBoardMap);
     // Toggle the color's turn
     this.whitesTurn = !this.whitesTurn;
   }
@@ -552,10 +582,12 @@ class Validator {
    function for that piece (urrently only for the Queen)
   */
   ValidateMove(origin, dest, piece) {
-    // console.log(JSON.stringify(this.boardMap));
-    let isValid = false;
+    // Tempporarily change the movingPieceColor to the moving piece's color
+    // If the move is invalid, thecolor will be changed back to the previous one
+    // tempHoldColor holds the previous color value
     let tempHoldColor = this.movingPiecesColor;
     this.movingPiecesColor = getPieceColor(piece);
+    let isValid = false;
     // Check if the moving piece matches the appropriate color's turn
     if (this.whitesTurn && this.movingPiecesColor !== 'w') {
       return false;
@@ -580,14 +612,8 @@ class Validator {
       case `R`:
         isValid = this.validateRookMove(origin, dest, `w`);
         break;
-      case 'q':
-        isValid = this.validateQueenMove(origin, dest, `b`);
-        break;
-      case `P`:
-        isValid = true;
-        break;
-      case 'p':
-        isValid = true;
+      case `r`:
+        isValid = this.validateRookMove(origin, dest, `b`);
         break;
       case `B`:
         isValid = this.validateBishopMove(origin, dest, `w`);
@@ -595,19 +621,125 @@ class Validator {
       case 'b':
         isValid = this.validateBishopMove(origin, dest, `b`);
         break;
-      default:
-        isValid = true;
+      case 'N':
+        isValid = this.validateKnightMove(origin, dest, `w`);
+        break;
+      case 'n':
+        isValid = this.validateKnightMove(origin, dest, `b`);
+        break;
+      case 'P':
+        isValid = this.validatePawnMove(origin, dest, `w`);
+        break;
+      case 'p':
+        isValid = this.validatePawnMove(origin, dest, `b`);
+        break;
     }
     if (isValid) {
       // Set the info of the moving piece to the states
       this.movingPiece = piece;
       this.movingPiecesOrigin = origin;
       this.movingPiecesDest = dest;
+      // Call the NewMove method to update the game's states
       this.NewMove();
+      console.log(this.boardMap);
       return true;
     }
+    // If none of the checks returned true, that means that the move is invalid
+    // Change the movingPieeColor's value to the previous color
     this.movingPiecesColor = tempHoldColor;
     return false;
+  }
+  validatePawnMove(origin, dest, color) {
+    // Get the file and rank information and check they are correct
+    const fileAndRankArray = getOriginAndDestInfo(origin, dest);
+    if (fileAndRankArray.includes(null)) {
+      console.log('invalid square input');
+      return false;
+    }
+    // Get the information of the origin and destination squares and their differences
+    const [originFile, originRank, destFile, destRank] = fileAndRankArray;
+    const [fileDifference, rankDifference] = getFileAndRankDifferences(originFile, originRank, destFile, destRank);
+    // A Pawn cammot move diagonally more than 1 square
+    if (fileDifference > 1 || rankDifference > 2) {
+      return false;
+    }
+    let objectedPieceColor = '';
+    if (color === 'w') {
+      if (rankDifference === 2 && originRank !== '2') {
+        return false;
+      }
+      if (!(parseInt(destRank) > parseInt(originRank))) {
+        return false;
+      }
+      if (fileDifference === rankDifference) {
+        console.log(getPieceColor(this.boardMap[destFile][destRank]));
+        if (getPieceColor(this.boardMap[destFile][destRank]) === 'b') {
+          return true;
+        }
+        else {
+          return false;
+        }
+      }
+      objectedPieceColor = checkThroughFile(originRank, destRank, originFile, this.boardMap).color;
+      if (objectedPieceColor !== '') {
+        return false;
+      }
+    }
+    else if (color === 'b') {
+      if (rankDifference === 2 && originRank !== '7') {
+        return false;
+      }
+      if (!(parseInt(destRank) < parseInt(originRank))) {
+        return false;
+      }
+      if (fileDifference === rankDifference) {
+        console.log(getPieceColor(this.boardMap[destFile][destRank]));
+        if (getPieceColor(this.boardMap[destFile][destRank]) === 'w') {
+          return true;
+        }
+        else {
+          return false;
+        }
+      }
+      objectedPieceColor = checkThroughFile(originRank, destRank, originFile, this.boardMap).color;
+      if (objectedPieceColor !== '') {
+        return false;
+      }
+    }
+    // console.log(`${objectedPieceColor}`);
+    return true;
+  }
+  /**
+   * Validator method for the QueeKnight that checks if
+   * the square the Knoght is trying to move to is legal.
+   * As of now it does not check for any special rules (like moving
+   * while being pinned)
+   */
+  validateKnightMove(origin, dest, color) {
+    // Get the file and rank information and check they are correct
+    const fileAndRankArray = getOriginAndDestInfo(origin, dest);
+    if (fileAndRankArray.includes(null)) {
+      console.log('invalid square input');
+      return false;
+    }
+    // Get the information of the origin and destination squares
+    const [originFile, originRank, destFile, destRank] = fileAndRankArray;
+    const [fileDifference, rankDifference] = getFileAndRankDifferences(originFile, originRank, destFile, destRank);
+    // Check that the Knight can only move in an L shape
+    if (!((fileDifference === 1 && rankDifference === 2) ||
+      (fileDifference === 2 && rankDifference === 1))) {
+      return false;
+    }
+    // Check if thereis any piece on the destination square
+    // and get its color
+    const destPieceColor = getPieceColor(this.boardMap[destFile][destRank]);
+    // If the obected piece's color is same as the Knight
+    // then the Knight cannot move /to it
+    if (color === destPieceColor) {
+      return false;
+    }
+    // if none of checks returned false, that means the move is valid
+    return true;
   }
   /**
    * Validator method for the Queen that checks if

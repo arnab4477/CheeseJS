@@ -140,7 +140,6 @@ export const getDiagonalEdge = (
   square: string,
   direction: string
 ): Array<string> => {
-  console.log(`${square}`);
   const [file, rank] = getFileAndRank(square);
   let fileUnicode = file.charCodeAt(0);
   let rankNum = parseInt(rank);
@@ -323,6 +322,44 @@ export const checkThroughRank = (
   return { square, piece, color };
 };
 
+export const checkKnightMove = (
+  originFile: string,
+  originRank: string,
+  destFile: string,
+  destRank: string,
+  boardMap: BoardType
+): { square: string; piece: string; color: string } => {
+  // Initialize the return values that will hold the data for the piece and
+  // its square
+  let square: string = ``;
+  let piece: string = ``;
+  let color: string = ``;
+
+  // If the destination is same as the origin, return the origin
+  if (originFile === destFile && originRank === destRank) {
+    console.log(`invalid 1 ${square}, ${piece}. ${color}`);
+    return { square: originFile + originRank, piece, color };
+  }
+
+  const [fileDifference, rankDifference] = getFileAndRankDifferences(
+    originFile,
+    originRank,
+    destFile,
+    destRank
+  );
+
+  if (
+    (fileDifference === 1 && rankDifference === 2) ||
+    (fileDifference === 2 && rankDifference === 1)
+  ) {
+    square = destFile + destRank;
+    piece = boardMap[destFile][destRank];
+    color = getPieceColor(piece);
+  }
+
+  return { square, piece, color };
+};
+
 /**
  * Function that takes two squares and checks if they are adjacent
  * to one another, either vertically, horizontally or diagonally
@@ -410,7 +447,7 @@ export const updateBoardMap = (
     dest
   );
 
-  let boardMapToUpdate = { ...boardMap };
+  let boardMapToUpdate: BoardType = { ...boardMap };
 
   // Empty and original square and place the piece on the destination square
   boardMapToUpdate[originFile][originRank] = '';

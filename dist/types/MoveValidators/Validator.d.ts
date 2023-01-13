@@ -14,6 +14,7 @@ declare class Validator {
    function for that piece (urrently only for the Queen)
   */
   ValidateMove(origin: string, dest: string, piece: string): boolean;
+  private validatePawnMove;
   /**
    * Validator method for the QueeKnight that checks if
    * the square the Knoght is trying to move to is legal.

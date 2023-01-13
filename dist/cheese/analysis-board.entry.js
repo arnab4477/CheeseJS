@@ -352,6 +352,16 @@ const updateBoardMap = (piece, origin, dest, boardMap) => {
   const [originFile, originRank, destFile, destRank] = getOriginAndDestInfo(origin, dest);
   let boardMapToUpdate = Object.assign({}, boardMap);
   // Empty and original square and place the piece on the destination square
+  // let boardMapToUpdate = {
+  //   ...boardMap,
+  //   originFile: {
+  //     originRank: '',
+  //   },
+  //   destFile: {
+  //     destRank: piece,
+  //   },
+  // };
+  // // Empty and original square and place the piece on the destination square
   boardMapToUpdate[originFile][originRank] = '';
   boardMapToUpdate[destFile][destRank] = piece;
   return boardMapToUpdate;
@@ -562,7 +572,8 @@ class Validator {
    */
   NewMove() {
     // Update the board map
-    this.boardMap = updateBoardMap(this.movingPiece, this.movingPiecesOrigin, this.movingPiecesDest, this.boardMap);
+    const updatedBoardMap = updateBoardMap(this.movingPiece, this.movingPiecesOrigin, this.movingPiecesDest, this.boardMap);
+    this.boardMap = Object.assign({}, updatedBoardMap);
     // Toggle the color's turn
     this.whitesTurn = !this.whitesTurn;
   }
@@ -601,14 +612,8 @@ class Validator {
       case `R`:
         isValid = this.validateRookMove(origin, dest, `w`);
         break;
-      case 'q':
-        isValid = this.validateQueenMove(origin, dest, `b`);
-        break;
-      case `P`:
-        isValid = true;
-        break;
-      case 'p':
-        isValid = true;
+      case `r`:
+        isValid = this.validateRookMove(origin, dest, `b`);
         break;
       case `B`:
         isValid = this.validateBishopMove(origin, dest, `w`);
@@ -622,8 +627,12 @@ class Validator {
       case 'n':
         isValid = this.validateKnightMove(origin, dest, `b`);
         break;
-      default:
-        isValid = true;
+      case 'P':
+        isValid = this.validatePawnMove(origin, dest, `w`);
+        break;
+      case 'p':
+        isValid = this.validatePawnMove(origin, dest, `b`);
+        break;
     }
     if (isValid) {
       // Set the info of the moving piece to the states
@@ -632,12 +641,73 @@ class Validator {
       this.movingPiecesDest = dest;
       // Call the NewMove method to update the game's states
       this.NewMove();
+      console.log(this.boardMap);
       return true;
     }
     // If none of the checks returned true, that means that the move is invalid
     // Change the movingPieeColor's value to the previous color
     this.movingPiecesColor = tempHoldColor;
     return false;
+  }
+  validatePawnMove(origin, dest, color) {
+    // Get the file and rank information and check they are correct
+    const fileAndRankArray = getOriginAndDestInfo(origin, dest);
+    if (fileAndRankArray.includes(null)) {
+      console.log('invalid square input');
+      return false;
+    }
+    // Get the information of the origin and destination squares and their differences
+    const [originFile, originRank, destFile, destRank] = fileAndRankArray;
+    const [fileDifference, rankDifference] = getFileAndRankDifferences(originFile, originRank, destFile, destRank);
+    // A Pawn cammot move diagonally more than 1 square
+    if (fileDifference > 1 || rankDifference > 2) {
+      return false;
+    }
+    let objectedPieceColor = '';
+    if (color === 'w') {
+      if (rankDifference === 2 && originRank !== '2') {
+        return false;
+      }
+      if (!(parseInt(destRank) > parseInt(originRank))) {
+        return false;
+      }
+      if (fileDifference === rankDifference) {
+        console.log(getPieceColor(this.boardMap[destFile][destRank]));
+        if (getPieceColor(this.boardMap[destFile][destRank]) === 'b') {
+          return true;
+        }
+        else {
+          return false;
+        }
+      }
+      objectedPieceColor = checkThroughFile(originRank, destRank, originFile, this.boardMap).color;
+      if (objectedPieceColor !== '') {
+        return false;
+      }
+    }
+    else if (color === 'b') {
+      if (rankDifference === 2 && originRank !== '7') {
+        return false;
+      }
+      if (!(parseInt(destRank) < parseInt(originRank))) {
+        return false;
+      }
+      if (fileDifference === rankDifference) {
+        console.log(getPieceColor(this.boardMap[destFile][destRank]));
+        if (getPieceColor(this.boardMap[destFile][destRank]) === 'w') {
+          return true;
+        }
+        else {
+          return false;
+        }
+      }
+      objectedPieceColor = checkThroughFile(originRank, destRank, originFile, this.boardMap).color;
+      if (objectedPieceColor !== '') {
+        return false;
+      }
+    }
+    // console.log(`${objectedPieceColor}`);
+    return true;
   }
   /**
    * Validator method for the QueeKnight that checks if
@@ -662,7 +732,7 @@ class Validator {
     }
     // Check if thereis any piece on the destination square
     // and get its color
-    const destPieceColor = getPieceColor(this.boardMap[originFile][originRank]);
+    const destPieceColor = getPieceColor(this.boardMap[destFile][destRank]);
     // If the obected piece's color is same as the Knight
     // then the Knight cannot move /to it
     if (color === destPieceColor) {

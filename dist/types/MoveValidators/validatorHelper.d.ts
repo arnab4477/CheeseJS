@@ -40,6 +40,11 @@ export declare const checkThroughRank: (originFile: string, destFile: string, ra
   piece: string;
   color: string;
 };
+export declare const checkKnightMove: (originFile: string, originRank: string, destFile: string, destRank: string, boardMap: BoardType) => {
+  square: string;
+  piece: string;
+  color: string;
+};
 /**
  * Function that takes two squares and checks if they are adjacent
  * to one another, either vertically, horizontally or diagonally

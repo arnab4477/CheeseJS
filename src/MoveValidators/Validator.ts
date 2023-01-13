@@ -2,6 +2,7 @@ import { fenToBoardMap } from '../pieces/pieceUtils';
 import { BoardType } from '../BoardTypes';
 import * as helpers from './validatorHelper';
 import { isCheck } from './check';
+
 class Validator {
   // Declarations of properties that will hold various states of the game
   private boardMap: BoardType = fenToBoardMap();
@@ -17,12 +18,14 @@ class Validator {
    */
   private NewMove(): void {
     // Update the board map
-    this.boardMap = helpers.updateBoardMap(
+    const updatedBoardMap = helpers.updateBoardMap(
       this.movingPiece,
       this.movingPiecesOrigin,
       this.movingPiecesDest,
       this.boardMap
     );
+
+    this.boardMap = { ...updatedBoardMap };
 
     // Toggle the color's turn
     this.whitesTurn = !this.whitesTurn;
@@ -65,14 +68,8 @@ class Validator {
       case `R`:
         isValid = this.validateRookMove(origin, dest, `w`);
         break;
-      case 'q':
-        isValid = this.validateQueenMove(origin, dest, `b`);
-        break;
-      case `P`:
-        isValid = true;
-        break;
-      case 'p':
-        isValid = true;
+      case `r`:
+        isValid = this.validateRookMove(origin, dest, `b`);
         break;
       case `B`:
         isValid = this.validateBishopMove(origin, dest, `w`);
@@ -86,8 +83,12 @@ class Validator {
       case 'n':
         isValid = this.validateKnightMove(origin, dest, `b`);
         break;
-      default:
-        isValid = true;
+      case 'P':
+        isValid = this.validatePawnMove(origin, dest, `w`);
+        break;
+      case 'p':
+        isValid = this.validatePawnMove(origin, dest, `b`);
+        break;
     }
 
     if (isValid) {
@@ -98,6 +99,7 @@ class Validator {
 
       // Call the NewMove method to update the game's states
       this.NewMove();
+      console.log(this.boardMap);
       return true;
     }
 
@@ -108,8 +110,102 @@ class Validator {
   }
 
   /**
-   * Validator method for the QueeKnight that checks if
-   * the square the Knoght is trying to move to is legal.
+   * Validator method for the Pawn that checks if
+   * the square the Pawn is trying to move to is legal.
+   * As of now it does not check for any special rules (like moving
+   * while being pinned)
+   */
+  private validatePawnMove(origin: string, dest: string, color: string) {
+    // Get the file and rank information and check they are correct
+    const fileAndRankArray = helpers.getOriginAndDestInfo(origin, dest);
+    if (fileAndRankArray.includes(null)) {
+      console.log('invalid square input');
+      return false;
+    }
+
+    // Get the information of the origin and destination squares and their differences
+    const [originFile, originRank, destFile, destRank] = fileAndRankArray;
+    const [fileDifference, rankDifference] = helpers.getFileAndRankDifferences(
+      originFile,
+      originRank,
+      destFile,
+      destRank
+    );
+
+    // A Pawn cammot move diagonally or vertically more than 1 square
+    if (fileDifference > 1 || rankDifference > 2) {
+      return false;
+    }
+
+    let objectedPieceColor: string = '';
+
+    if (color === 'w') {
+      // Pawns can only move 2 squares from their initial position
+      if (rankDifference === 2 && originRank !== '2') {
+        return false;
+      }
+      // White Pawns can only move up
+      if (!(parseInt(destRank) > parseInt(originRank))) {
+        return false;
+      }
+      if (fileDifference === rankDifference) {
+        // A Pawn can only move diagonally if it is capturing an enemy piece
+        if (helpers.getPieceColor(this.boardMap[destFile][destRank]) === 'b') {
+          return true;
+        } else {
+          return false;
+        }
+      }
+
+      objectedPieceColor = helpers.checkThroughFile(
+        originRank,
+        destRank,
+        originFile,
+        this.boardMap
+      ).color;
+
+      // Pawns can only move forward if the square is empty
+      if (objectedPieceColor !== '') {
+        return false;
+      }
+    } else if (color === 'b') {
+      // Pawns can only move 2 squares from their initial position
+      if (rankDifference === 2 && originRank !== '7') {
+        return false;
+      }
+      // Black Pawns can only move down
+      if (!(parseInt(destRank) < parseInt(originRank))) {
+        return false;
+      }
+      if (fileDifference === rankDifference) {
+        // A Pawn can only move diagonally if it is capturing an enemy piece
+        if (helpers.getPieceColor(this.boardMap[destFile][destRank]) === 'w') {
+          return true;
+        } else {
+          return false;
+        }
+      }
+
+      objectedPieceColor = helpers.checkThroughFile(
+        originRank,
+        destRank,
+        originFile,
+        this.boardMap
+      ).color;
+
+      // Pawns can only move forward if the square is empty
+      if (objectedPieceColor !== '') {
+        return false;
+      }
+    }
+    // console.log(`${objectedPieceColor}`);
+
+    return true;
+  }
+
+  /**
+   * Validator method for the Knight that checks if
+   * the square the Knight is trying to move to is legal.
    * As of now it does not check for any special rules (like moving
    * while being pinned)
    */
@@ -147,7 +243,7 @@ class Validator {
     // Check if thereis any piece on the destination square
     // and get its color
     const destPieceColor = helpers.getPieceColor(
-      this.boardMap[originFile][originRank]
+      this.boardMap[destFile][destRank]
     );
 
     // If the obected piece's color is same as the Knight
