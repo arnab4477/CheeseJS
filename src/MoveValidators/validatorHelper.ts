@@ -447,7 +447,7 @@ export const updateBoardMap = (
     dest
   );
 
-  let boardMapToUpdate: BoardType = { ...boardMap };
+  let boardMapToUpdate: BoardType = JSON.parse(JSON.stringify(boardMap));
 
   // Empty and original square and place the piece on the destination square
   boardMapToUpdate[originFile][originRank] = '';

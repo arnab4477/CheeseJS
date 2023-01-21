@@ -1,6 +1,7 @@
 import { Component, Prop, h, ComponentDidLoad } from '@stencil/core';
 import { generateChessBoard } from '../../utils/chessboard';
 import Validator from '../../MoveValidators/Validator';
+import * as specials from '../../MoveValidators/specialMoves';
 
 @Component({
   tag: 'analysis-board',
@@ -66,13 +67,26 @@ export class AnalysisBoard implements ComponentDidLoad {
         const piece = pieceBeingDragged.id;
 
         // Validate the move
-        const isValid: boolean = this.validator.ValidateMove(
+        const { isValid, isEnPassant } = this.validator.ValidateMove(
           originSquare,
           destSquare,
           piece
         );
 
         if (isValid) {
+          // Get the square where the opposite Pawn moved 2 squares tp (which can get en passanted)
+          // and remove that Pawn
+          if (isEnPassant) {
+            const enPassantSquare = specials.getEnPassantSquare(
+              destSquare,
+              piece,
+              this.analysisBoardContainer
+            );
+
+            enPassantSquare.innerHTML = '';
+            square.appendChild(pieceBeingDragged);
+            return;
+          }
           square.innerHTML = '';
           square.appendChild(pieceBeingDragged);
         }

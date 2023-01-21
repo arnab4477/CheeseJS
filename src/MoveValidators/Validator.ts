@@ -1,6 +1,7 @@
 import { fenToBoardMap } from '../pieces/pieceUtils';
 import { BoardType } from '../BoardTypes';
 import * as helpers from './validatorHelper';
+import * as specials from './specialMoves';
 import { isCheck } from './check';
 
 class Validator {
@@ -12,6 +13,9 @@ class Validator {
 
   private movingPiecesDest: string = '';
   private movingPiecesColor: string = '';
+
+  private canWhiteEnPassant: (boolean | string)[] = [false, ''];
+  private canBlackEnPassant: (boolean | string)[] = [false, ''];
 
   /**
    * Method to run after each move that updates the game's various states
@@ -25,7 +29,7 @@ class Validator {
       this.boardMap
     );
 
-    this.boardMap = { ...updatedBoardMap };
+    this.boardMap = JSON.parse(JSON.stringify(updatedBoardMap));
 
     // Toggle the color's turn
     this.whitesTurn = !this.whitesTurn;
@@ -35,7 +39,11 @@ class Validator {
    Validator method that takes in a piece and runs the corresponding validator
    function for that piece (urrently only for the Queen) 
   */
-  public ValidateMove(origin: string, dest: string, piece: string): boolean {
+  public ValidateMove(
+    origin: string,
+    dest: string,
+    piece: string
+  ): { isValid: boolean; isEnPassant: boolean } {
     // Tempporarily change the movingPieceColor to the moving piece's color
     // If the move is invalid, thecolor will be changed back to the previous one
     // tempHoldColor holds the previous color value
@@ -43,15 +51,16 @@ class Validator {
     this.movingPiecesColor = helpers.getPieceColor(piece);
 
     let isValid: boolean = false;
+    let isEnPassant: boolean = false;
 
     // Check if the moving piece matches the appropriate color's turn
     if (this.whitesTurn && this.movingPiecesColor !== 'w') {
-      return false;
+      return { isValid, isEnPassant };
     } else if (!this.whitesTurn && this.movingPiecesColor !== 'b') {
-      return false;
+      return { isValid, isEnPassant };
     }
 
-    // Run the validator function for the moving piece (currently only Queen)
+    // Run the validator function for the moving piece
     switch (piece) {
       case `K`:
         isValid = this.validateKingMove(origin, dest, `w`);
@@ -84,10 +93,10 @@ class Validator {
         isValid = this.validateKnightMove(origin, dest, `b`);
         break;
       case 'P':
-        isValid = this.validatePawnMove(origin, dest, `w`);
+        ({ isValid, isEnPassant } = this.validatePawnMove(origin, dest, `w`));
         break;
       case 'p':
-        isValid = this.validatePawnMove(origin, dest, `b`);
+        ({ isValid, isEnPassant } = this.validatePawnMove(origin, dest, `b`));
         break;
     }
 
@@ -97,16 +106,20 @@ class Validator {
       this.movingPiecesOrigin = origin;
       this.movingPiecesDest = dest;
 
+      if (!(piece === 'P' || piece === 'p')) {
+        this.canBlackEnPassant = [false, ''];
+        this.canWhiteEnPassant = [false, ''];
+      }
+
       // Call the NewMove method to update the game's states
       this.NewMove();
-      console.log(this.boardMap);
-      return true;
+      return { isValid, isEnPassant };
     }
 
     // If none of the checks returned true, that means that the move is invalid
     // Change the movingPieeColor's value to the previous color
     this.movingPiecesColor = tempHoldColor;
-    return false;
+    return { isValid, isEnPassant };
   }
 
   /**
@@ -115,12 +128,16 @@ class Validator {
    * As of now it does not check for any special rules (like moving
    * while being pinned)
    */
-  private validatePawnMove(origin: string, dest: string, color: string) {
+  private validatePawnMove(
+    origin: string,
+    dest: string,
+    color: string
+  ): { isValid: boolean; isEnPassant: boolean } {
     // Get the file and rank information and check they are correct
     const fileAndRankArray = helpers.getOriginAndDestInfo(origin, dest);
     if (fileAndRankArray.includes(null)) {
       console.log('invalid square input');
-      return false;
+      return { isValid: false, isEnPassant: false };
     }
 
     // Get the information of the origin and destination squares and their differences
@@ -134,26 +151,43 @@ class Validator {
 
     // A Pawn cammot move diagonally or vertically more than 1 square
     if (fileDifference > 1 || rankDifference > 2) {
-      return false;
+      return { isValid: false, isEnPassant: false };
     }
 
     let objectedPieceColor: string = '';
+    const isEnPassant = specials.isEnPassant(
+      destFile,
+      originRank,
+      destRank,
+      color,
+      this.boardMap
+    );
 
     if (color === 'w') {
       // Pawns can only move 2 squares from their initial position
       if (rankDifference === 2 && originRank !== '2') {
-        return false;
+        return { isValid: false, isEnPassant: false };
       }
       // White Pawns can only move up
       if (!(parseInt(destRank) > parseInt(originRank))) {
-        return false;
+        return { isValid: false, isEnPassant: false };
       }
       if (fileDifference === rankDifference) {
+        if (
+          isEnPassant &&
+          this.canWhiteEnPassant[0] &&
+          this.boardMap[destFile][destRank] === '' &&
+          destFile === this.canWhiteEnPassant[1]
+        ) {
+          this.canWhiteEnPassant = [false, ''];
+          return { isValid: true, isEnPassant: true };
+        }
+
         // A Pawn can only move diagonally if it is capturing an enemy piece
         if (helpers.getPieceColor(this.boardMap[destFile][destRank]) === 'b') {
-          return true;
+          return { isValid: true, isEnPassant: false };
         } else {
-          return false;
+          return { isValid: false, isEnPassant: false };
         }
       }
 
@@ -166,23 +200,32 @@ class Validator {
 
       // Pawns can only move forward if the square is empty
       if (objectedPieceColor !== '') {
-        return false;
+        return { isValid: false, isEnPassant: false };
       }
     } else if (color === 'b') {
       // Pawns can only move 2 squares from their initial position
       if (rankDifference === 2 && originRank !== '7') {
-        return false;
+        return { isValid: false, isEnPassant: false };
       }
       // Black Pawns can only move down
       if (!(parseInt(destRank) < parseInt(originRank))) {
-        return false;
+        return { isValid: false, isEnPassant: false };
       }
       if (fileDifference === rankDifference) {
+        if (
+          isEnPassant &&
+          this.canBlackEnPassant[0] &&
+          this.boardMap[destFile][destRank] === '' &&
+          destFile === this.canBlackEnPassant[1]
+        ) {
+          this.canBlackEnPassant = [false, ''];
+          return { isValid: true, isEnPassant: true };
+        }
         // A Pawn can only move diagonally if it is capturing an enemy piece
         if (helpers.getPieceColor(this.boardMap[destFile][destRank]) === 'w') {
-          return true;
+          return { isValid: true, isEnPassant: false };
         } else {
-          return false;
+          return { isValid: false, isEnPassant: false };
         }
       }
 
@@ -195,12 +238,22 @@ class Validator {
 
       // Pawns can only move forward if the square is empty
       if (objectedPieceColor !== '') {
-        return false;
+        return { isValid: false, isEnPassant: false };
       }
     }
-    // console.log(`${objectedPieceColor}`);
 
-    return true;
+    if (rankDifference === 2) {
+      if (color === 'w') {
+        this.canBlackEnPassant = [true, originFile];
+      } else if (color === 'b') {
+        this.canWhiteEnPassant = [true, originFile];
+      }
+    } else {
+      this.canWhiteEnPassant = [false, ''];
+      this.canBlackEnPassant = [false, ''];
+    }
+
+    return { isValid: true, isEnPassant: false };
   }
 
   /**

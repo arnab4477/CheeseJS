@@ -5,6 +5,8 @@ declare class Validator {
   private movingPiecesOrigin;
   private movingPiecesDest;
   private movingPiecesColor;
+  private canWhiteEnPassant;
+  private canBlackEnPassant;
   /**
    * Method to run after each move that updates the game's various states
    */
@@ -13,11 +15,20 @@ declare class Validator {
    Validator method that takes in a piece and runs the corresponding validator
    function for that piece (urrently only for the Queen)
   */
-  ValidateMove(origin: string, dest: string, piece: string): boolean;
+  ValidateMove(origin: string, dest: string, piece: string): {
+    isValid: boolean;
+    isEnPassant: boolean;
+  };
+  /**
+   * Validator method for the Pawn that checks if
+   * the square the Pawn is trying to move to is legal.
+   * As of now it does not check for any special rules (like moving
+   * while being pinned)
+   */
   private validatePawnMove;
   /**
-   * Validator method for the QueeKnight that checks if
-   * the square the Knoght is trying to move to is legal.
+   * Validator method for the Knight that checks if
+   * the square the Knight is trying to move to is legal.
    * As of now it does not check for any special rules (like moving
    * while being pinned)
    */
