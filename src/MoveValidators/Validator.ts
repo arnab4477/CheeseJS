@@ -111,6 +111,14 @@ class Validator {
         this.canWhiteEnPassant = [false, ''];
       }
 
+      if (isEnPassant) {
+        if (piece === 'P') {
+          this.boardMap[dest[0]][(parseInt(dest[1]) - 1).toString()] = '';
+        } else if (piece === 'p') {
+          this.boardMap[dest[0]][(parseInt(dest[1]) + 1).toString()] = '';
+        }
+      }
+
       // Call the NewMove method to update the game's states
       this.NewMove();
       return { isValid, isEnPassant };
@@ -365,7 +373,7 @@ class Validator {
     );
 
     // If the move is more than one square then it is an illegal move
-    if (fileDifference !== 1 && rankDifference !== 1) {
+    if (rankDifference > 1) {
       return false;
     }
 
