@@ -67,7 +67,7 @@ export class AnalysisBoard implements ComponentDidLoad {
         const piece = pieceBeingDragged.id;
 
         // Validate the move
-        const { isValid, isEnPassant } = this.validator.ValidateMove(
+        const { isValid, isEnPassant, isCastle } = this.validator.ValidateMove(
           originSquare,
           destSquare,
           piece
@@ -87,6 +87,26 @@ export class AnalysisBoard implements ComponentDidLoad {
             square.appendChild(pieceBeingDragged);
             return;
           }
+
+          // If the move is a castling move, change the King and the Rook's
+          // positions accordingly
+          if (isCastle && (piece === 'K' || piece === 'k')) {
+            const [KingsOrigin, KingsDest, RooksOrigin, RooksDest] =
+              specials.getCastlingSquares(
+                piece,
+                destSquare,
+                this.analysisBoardContainer
+              );
+
+            KingsOrigin.innerHTML = '';
+            KingsDest.appendChild(pieceBeingDragged);
+
+            const Rook = RooksOrigin.firstChild;
+            RooksOrigin.innerHTML = '';
+            RooksDest.appendChild(Rook);
+            return;
+          }
+
           square.innerHTML = '';
           square.appendChild(pieceBeingDragged);
         }

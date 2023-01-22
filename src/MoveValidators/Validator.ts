@@ -17,6 +17,11 @@ class Validator {
   private canWhiteEnPassant: (boolean | string)[] = [false, ''];
   private canBlackEnPassant: (boolean | string)[] = [false, ''];
 
+  private canWhiteCastleKingSide: boolean = true;
+  private canWhiteCastleQueenSide: boolean = true;
+  private canBlackCastleKingSide: boolean = true;
+  private canBlackCastleQueenSide: boolean = true;
+
   /**
    * Method to run after each move that updates the game's various states
    */
@@ -43,30 +48,32 @@ class Validator {
     origin: string,
     dest: string,
     piece: string
-  ): { isValid: boolean; isEnPassant: boolean } {
+  ): { isValid: boolean; isEnPassant: boolean; isCastle: boolean } {
     // Tempporarily change the movingPieceColor to the moving piece's color
     // If the move is invalid, thecolor will be changed back to the previous one
     // tempHoldColor holds the previous color value
     let tempHoldColor = this.movingPiecesColor;
     this.movingPiecesColor = helpers.getPieceColor(piece);
 
+    // Initialize the return values
     let isValid: boolean = false;
     let isEnPassant: boolean = false;
+    let isCastle: boolean = false;
 
     // Check if the moving piece matches the appropriate color's turn
     if (this.whitesTurn && this.movingPiecesColor !== 'w') {
-      return { isValid, isEnPassant };
+      return { isValid, isEnPassant, isCastle };
     } else if (!this.whitesTurn && this.movingPiecesColor !== 'b') {
-      return { isValid, isEnPassant };
+      return { isValid, isEnPassant, isCastle };
     }
 
     // Run the validator function for the moving piece
     switch (piece) {
       case `K`:
-        isValid = this.validateKingMove(origin, dest, `w`);
+        ({ isValid, isCastle } = this.validateKingMove(origin, dest, `w`));
         break;
       case 'k':
-        isValid = this.validateKingMove(origin, dest, `b`);
+        ({ isValid, isCastle } = this.validateKingMove(origin, dest, `b`));
         break;
       case `Q`:
         isValid = this.validateQueenMove(origin, dest, `w`);
@@ -106,6 +113,48 @@ class Validator {
       this.movingPiecesOrigin = origin;
       this.movingPiecesDest = dest;
 
+      // Take away the King's castling rights after it moves
+      if (piece === 'K') {
+        this.canWhiteCastleKingSide = false;
+        this.canWhiteCastleQueenSide = false;
+      } else if (piece === 'k') {
+        this.canBlackCastleKingSide = false;
+        this.canBlackCastleQueenSide = false;
+      }
+
+      // If the move is a castling move update the board accordingly
+      if (isCastle) {
+        if (piece === 'K') {
+          this.boardMap['e']['1'] = '';
+
+          if (dest === 'g1' || dest === 'h1') {
+            this.boardMap['g']['1'] = 'K';
+            this.boardMap['f']['1'] = 'R';
+            this.boardMap['h']['1'] = '';
+          } else if (dest === 'c1' || dest === 'a1') {
+            this.boardMap['c']['1'] = 'K';
+            this.boardMap['d']['1'] = 'R';
+            this.boardMap['a']['1'] = '';
+          }
+        } else if (piece === 'k') {
+          this.boardMap['e']['8'] = '';
+
+          if (dest === 'g8' || dest === 'h8') {
+            this.boardMap['g']['8'] = 'k';
+            this.boardMap['f']['8'] = 'r';
+            this.boardMap['h']['8'] = '';
+          } else if (dest === 'c8' || dest === 'a8') {
+            this.boardMap['c']['8'] = 'k';
+            this.boardMap['d']['8'] = 'r';
+            this.boardMap['a']['8'] = '';
+          }
+        }
+
+        // Toggle the color's turn
+        this.whitesTurn = !this.whitesTurn;
+        return { isValid, isEnPassant, isCastle };
+      }
+
       if (!(piece === 'P' || piece === 'p')) {
         this.canBlackEnPassant = [false, ''];
         this.canWhiteEnPassant = [false, ''];
@@ -121,13 +170,13 @@ class Validator {
 
       // Call the NewMove method to update the game's states
       this.NewMove();
-      return { isValid, isEnPassant };
+      return { isValid, isEnPassant, isCastle };
     }
 
     // If none of the checks returned true, that means that the move is invalid
     // Change the movingPieeColor's value to the previous color
     this.movingPiecesColor = tempHoldColor;
-    return { isValid, isEnPassant };
+    return { isValid, isEnPassant, isCastle };
   }
 
   /**
@@ -355,13 +404,11 @@ class Validator {
     origin: string,
     dest: string,
     color: string
-  ): boolean {
+  ): { isValid: boolean; isCastle: boolean } {
+    let isValid: boolean = false;
+
     // Get the file and rank information and check they are correct
     const fileAndRankArray = helpers.getOriginAndDestInfo(origin, dest);
-    if (fileAndRankArray.includes(null)) {
-      console.log('invalid square input');
-      return false;
-    }
 
     // Get the information of the origin and destination squares and their differences
     const [originFile, originRank, destFile, destRank] = fileAndRankArray;
@@ -372,9 +419,30 @@ class Validator {
       destRank
     );
 
+    // Check if the move is a castling move
+    const isCastle = specials.isCastle(
+      origin,
+      dest,
+      color,
+      this.boardMap,
+      this.canWhiteCastleKingSide,
+      this.canWhiteCastleQueenSide,
+      this.canBlackCastleKingSide,
+      this.canBlackCastleQueenSide
+    );
+
     // If the move is more than one square then it is an illegal move
     if (rankDifference > 1) {
-      return false;
+      return { isValid, isCastle };
+    }
+
+    // The King can only move 2 files if it is a castling move
+    if (fileDifference > 1) {
+      if (isCastle) {
+        isValid = true;
+        return { isValid, isCastle };
+      }
+      return { isValid, isCastle };
     }
 
     /*
@@ -382,17 +450,18 @@ class Validator {
     So, after the one square rule is validated, the Queen's validator can be used
     for the King's move
      */
-    const isValidMove = this.validateQueenMove(origin, dest, color);
-    if (!isValidMove) {
-      return false;
+    isValid = this.validateQueenMove(origin, dest, color);
+    if (!isValid) {
+      return { isValid, isCastle };
     }
 
     if (isCheck(dest, color, this.boardMap)) {
-      return false;
+      isValid = false;
+      return { isValid, isCastle };
     }
 
     // if none of checks returned false, that means the move is valid
-    return true;
+    return { isValid, isCastle };
   }
 
   /**
@@ -507,6 +576,13 @@ class Validator {
         return false;
       }
     }
+
+    // If the Rook moves from its original square, take awau the
+    // castling rights of the King according to which Rook moved
+    if (origin === 'a1') this.canWhiteCastleQueenSide = false;
+    if (origin === 'h1') this.canWhiteCastleKingSide = false;
+    if (origin === 'a8') this.canBlackCastleQueenSide = false;
+    if (origin === 'h8') this.canBlackCastleKingSide = false;
 
     // if none of checks returned false, that means the move is valid
     return true;

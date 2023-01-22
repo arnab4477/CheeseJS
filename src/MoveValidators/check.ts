@@ -21,7 +21,6 @@ export const checkVertically = (
   };
 
   // Check if any piece is on the way
-
   if (direction === 'up') {
     objectedSquareInfo = helpers.checkThroughFile(rank, '8', file, boardMap);
   } else if (direction === 'down') {

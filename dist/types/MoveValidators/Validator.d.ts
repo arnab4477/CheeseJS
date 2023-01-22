@@ -7,6 +7,10 @@ declare class Validator {
   private movingPiecesColor;
   private canWhiteEnPassant;
   private canBlackEnPassant;
+  private canWhiteCastleKingSide;
+  private canWhiteCastleQueenSide;
+  private canBlackCastleKingSide;
+  private canBlackCastleQueenSide;
   /**
    * Method to run after each move that updates the game's various states
    */
@@ -18,6 +22,7 @@ declare class Validator {
   ValidateMove(origin: string, dest: string, piece: string): {
     isValid: boolean;
     isEnPassant: boolean;
+    isCastle: boolean;
   };
   /**
    * Validator method for the Pawn that checks if

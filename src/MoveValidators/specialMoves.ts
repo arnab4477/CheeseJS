@@ -1,6 +1,7 @@
 // import * as helpers from './validatorHelper';
 import { BoardType } from '../BoardTypes';
 import * as helpers from './validatorHelper';
+import * as check from './check';
 
 /**
  * Function to check if a Pawn move is en passant.This does not heck the legality
@@ -60,4 +61,162 @@ export const getEnPassantSquare = (
 
     return enPassantedSquare;
   }
+};
+
+export const isCastle = (
+  origin: string,
+  dest: string,
+  color,
+  boardMap: BoardType,
+  canWhiteCastleKingSide: boolean,
+  canWhiteCastleQueenSide: boolean,
+  canBlackCastleKingSide: boolean,
+  canBlackCastleQueenSide: boolean
+): boolean => {
+  if (color === 'w') {
+    if (
+      origin !== 'e1' ||
+      !(dest === 'g1' || dest === 'h1' || dest === 'c1' || dest === 'a1') ||
+      !(boardMap['h']['1'] === 'R' || boardMap['a']['1'] === 'R')
+    ) {
+      return false;
+    }
+    // Validate Kingside castle
+    if (dest === 'g1' || dest === 'h1') {
+      if (!canWhiteCastleKingSide) {
+        return false;
+      }
+
+      // The castlingsquares must be empty
+      if (boardMap['f']['1'] !== '' || boardMap['g']['1'] !== '') {
+        return false;
+      }
+
+      // <ale sure that the castling squares are not checked by amy piece
+      const isF1Checked = check.isCheck('f1', 'w', boardMap);
+      const isG1Checked = check.isCheck('g1', 'w', boardMap);
+
+      if (isF1Checked || isG1Checked) {
+        return false;
+      }
+      return true;
+    }
+    // Validate Queenside castle
+    if (dest === 'c1' || dest === 'a1') {
+      if (!canWhiteCastleQueenSide) {
+        return false;
+      }
+
+      // The castlingsquares must be empty
+      if (boardMap['d']['1'] !== '' || boardMap['c']['1'] !== '') {
+        return false;
+      }
+
+      // <ale sure that the castling squares are not checked by amy piece
+      const isD1Checked = check.isCheck('d1', 'w', boardMap);
+      const isC1Checked = check.isCheck('c1', 'w', boardMap);
+
+      if (isD1Checked || isC1Checked) {
+        return false;
+      }
+      return true;
+    }
+  } else if (color === 'b') {
+    if (
+      origin !== 'e8' ||
+      !(dest === 'g8' || dest === 'h8' || dest === 'c8' || dest === 'a8') ||
+      !(boardMap['h']['8'] === 'r' || boardMap['a']['8'] === 'r')
+    ) {
+      return false;
+    }
+    // Validate Kingside castle
+    if (dest === 'g8' || dest === 'h8') {
+      if (!canBlackCastleKingSide) {
+        return false;
+      }
+
+      // The castlingsquares must be empty
+      if (boardMap['f']['8'] !== '' || boardMap['g']['8'] !== '') {
+        return false;
+      }
+
+      // <ale sure that the castling squares are not checked by amy piece
+      const isF8Checked = check.isCheck('f8', 'b', boardMap);
+      const isG8Checked = check.isCheck('g8', 'b', boardMap);
+
+      if (isF8Checked || isG8Checked) {
+        return false;
+      }
+      return true;
+    }
+    // Validate Queenside castle
+    if (dest === 'c8' || dest === 'a8') {
+      if (!canBlackCastleQueenSide) {
+        return false;
+      }
+
+      // The castlingsquares must be empty
+      if (boardMap['d']['8'] !== '' || boardMap['c']['8'] !== '') {
+        return false;
+      }
+
+      // <ale sure that the castling squares are not checked by amy piece
+      const isD8Checked = check.isCheck('d8', 'b', boardMap);
+      const isC8Checked = check.isCheck('c8', 'b', boardMap);
+
+      if (isD8Checked || isC8Checked) {
+        return false;
+      }
+      return true;
+    }
+  }
+};
+
+/**
+ * Function that returns the origin and desination squares of the King and the Rook castling
+ * as Element
+ */
+export const getCastlingSquares = (
+  piece: string,
+  dest: string,
+  documentHTML: HTMLElement
+): Array<Element> => {
+  let KingsOrigin: Element;
+  let KingsDest: Element;
+  let RooksOrigin: Element;
+  let RooksDest: Element;
+
+  if (piece === 'K') {
+    KingsOrigin = documentHTML.querySelector('#e1');
+    if (dest === 'g1' || dest === 'h1') {
+      // if the white King is castling Kingside, its destination square should be g1
+      // and the Rook should go to f1
+      KingsDest = documentHTML.querySelector('#g1');
+      RooksOrigin = documentHTML.querySelector('#h1');
+      RooksDest = documentHTML.querySelector('#f1');
+    } else if (dest === 'c1' || dest === 'a1') {
+      // if the white King is castling Queenside, its destination square should be c1
+      // and the Rook should go to d1
+      KingsDest = documentHTML.querySelector('#c1');
+      RooksOrigin = documentHTML.querySelector('#a1');
+      RooksDest = documentHTML.querySelector('#d1');
+    }
+  } else if (piece === 'k') {
+    KingsOrigin = documentHTML.querySelector('#e8');
+    if (dest === 'g8' || dest === 'h8') {
+      // if the black King is castling Kingside, its destination square should be g8
+      // and the Rook should go to f8
+      KingsDest = documentHTML.querySelector('#g8');
+      RooksOrigin = documentHTML.querySelector('#h8');
+      RooksDest = documentHTML.querySelector('#f8');
+    } else if (dest === 'c8' || dest === 'a8') {
+      // if the black King is castling Queenside, its destination square should be c8
+      // and the Rook should go to d8
+      KingsDest = documentHTML.querySelector('#c8');
+      RooksOrigin = documentHTML.querySelector('#a8');
+      RooksDest = documentHTML.querySelector('#d8');
+    }
+  }
+
+  return [KingsOrigin, KingsDest, RooksOrigin, RooksDest];
 };

@@ -391,47 +391,6 @@ const getFileAndRank = (square) => {
 };
 
 /**
- * Function to check if a Pawn move is en passant.This does not heck the legality
- * of the move (like if the Pawn can en passant or not)
- */
-const isEnPassant = (destFile, originRank, destRank, color, boardMap) => {
-  if (color === 'w') {
-    // White Pawns can only en passant from the 5th rank to the 6th rank
-    if (originRank !== '5' || destRank !== '6') {
-      return false;
-    }
-    // There must a black Pawn adjacent to the white Pawns origin square
-    if (boardMap[destFile][originRank] !== 'p') {
-      return false;
-    }
-    return true;
-  }
-  else if (color === 'b') {
-    // Black Pawns can only en passant from the 4th rank to the 3rd rank
-    if (originRank !== '4' || destRank !== '3') {
-      return false;
-    }
-    // There must a white Pawn adjacent to the black Pawns origin square
-    if (boardMap[destFile][originRank] !== 'P') {
-      return false;
-    }
-    return true;
-  }
-};
-const getEnPassantSquare = (square, piece, documentHTML) => {
-  if (getPieceColor(piece) === 'w') {
-    const enPassantedSquareId = square[0] + (parseInt(square[1]) - 1).toString();
-    const enPassantedSquare = documentHTML.querySelector(`#${enPassantedSquareId}`);
-    return enPassantedSquare;
-  }
-  else if (getPieceColor(piece) === 'b') {
-    const enPassantedSquareId = square[0] + (parseInt(square[1]) + 1).toString();
-    const enPassantedSquare = documentHTML.querySelector(`#${enPassantedSquareId}`);
-    return enPassantedSquare;
-  }
-};
-
-/**
  * Function that checks in a file according to the given direction if there are
  * any piece on the way which can give the King a check
  * @param direction must be either "up" or "down"
@@ -588,6 +547,176 @@ const isCheck = (square, color, boardMap) => {
   return false;
 };
 
+/**
+ * Function to check if a Pawn move is en passant.This does not heck the legality
+ * of the move (like if the Pawn can en passant or not)
+ */
+const isEnPassant = (destFile, originRank, destRank, color, boardMap) => {
+  if (color === 'w') {
+    // White Pawns can only en passant from the 5th rank to the 6th rank
+    if (originRank !== '5' || destRank !== '6') {
+      return false;
+    }
+    // There must a black Pawn adjacent to the white Pawns origin square
+    if (boardMap[destFile][originRank] !== 'p') {
+      return false;
+    }
+    return true;
+  }
+  else if (color === 'b') {
+    // Black Pawns can only en passant from the 4th rank to the 3rd rank
+    if (originRank !== '4' || destRank !== '3') {
+      return false;
+    }
+    // There must a white Pawn adjacent to the black Pawns origin square
+    if (boardMap[destFile][originRank] !== 'P') {
+      return false;
+    }
+    return true;
+  }
+};
+const getEnPassantSquare = (square, piece, documentHTML) => {
+  if (getPieceColor(piece) === 'w') {
+    const enPassantedSquareId = square[0] + (parseInt(square[1]) - 1).toString();
+    const enPassantedSquare = documentHTML.querySelector(`#${enPassantedSquareId}`);
+    return enPassantedSquare;
+  }
+  else if (getPieceColor(piece) === 'b') {
+    const enPassantedSquareId = square[0] + (parseInt(square[1]) + 1).toString();
+    const enPassantedSquare = documentHTML.querySelector(`#${enPassantedSquareId}`);
+    return enPassantedSquare;
+  }
+};
+const isCastle = (origin, dest, color, boardMap, canWhiteCastleKingSide, canWhiteCastleQueenSide, canBlackCastleKingSide, canBlackCastleQueenSide) => {
+  if (color === 'w') {
+    if (origin !== 'e1' ||
+      !(dest === 'g1' || dest === 'h1' || dest === 'c1' || dest === 'a1') ||
+      !(boardMap['h']['1'] === 'R' || boardMap['a']['1'] === 'R')) {
+      return false;
+    }
+    // Validate Kingside castle
+    if (dest === 'g1' || dest === 'h1') {
+      if (!canWhiteCastleKingSide) {
+        return false;
+      }
+      // The castlingsquares must be empty
+      if (boardMap['f']['1'] !== '' || boardMap['g']['1'] !== '') {
+        return false;
+      }
+      // <ale sure that the castling squares are not checked by amy piece
+      const isF1Checked = isCheck('f1', 'w', boardMap);
+      const isG1Checked = isCheck('g1', 'w', boardMap);
+      if (isF1Checked || isG1Checked) {
+        return false;
+      }
+      return true;
+    }
+    // Validate Queenside castle
+    if (dest === 'c1' || dest === 'a1') {
+      if (!canWhiteCastleQueenSide) {
+        return false;
+      }
+      // The castlingsquares must be empty
+      if (boardMap['d']['1'] !== '' || boardMap['c']['1'] !== '') {
+        return false;
+      }
+      // <ale sure that the castling squares are not checked by amy piece
+      const isD1Checked = isCheck('d1', 'w', boardMap);
+      const isC1Checked = isCheck('c1', 'w', boardMap);
+      if (isD1Checked || isC1Checked) {
+        return false;
+      }
+      return true;
+    }
+  }
+  else if (color === 'b') {
+    if (origin !== 'e8' ||
+      !(dest === 'g8' || dest === 'h8' || dest === 'c8' || dest === 'a8') ||
+      !(boardMap['h']['8'] === 'r' || boardMap['a']['8'] === 'r')) {
+      return false;
+    }
+    // Validate Kingside castle
+    if (dest === 'g8' || dest === 'h8') {
+      if (!canBlackCastleKingSide) {
+        return false;
+      }
+      // The castlingsquares must be empty
+      if (boardMap['f']['8'] !== '' || boardMap['g']['8'] !== '') {
+        return false;
+      }
+      // <ale sure that the castling squares are not checked by amy piece
+      const isF8Checked = isCheck('f8', 'b', boardMap);
+      const isG8Checked = isCheck('g8', 'b', boardMap);
+      if (isF8Checked || isG8Checked) {
+        return false;
+      }
+      return true;
+    }
+    // Validate Queenside castle
+    if (dest === 'c8' || dest === 'a8') {
+      if (!canBlackCastleQueenSide) {
+        return false;
+      }
+      // The castlingsquares must be empty
+      if (boardMap['d']['8'] !== '' || boardMap['c']['8'] !== '') {
+        return false;
+      }
+      // <ale sure that the castling squares are not checked by amy piece
+      const isD8Checked = isCheck('d8', 'b', boardMap);
+      const isC8Checked = isCheck('c8', 'b', boardMap);
+      if (isD8Checked || isC8Checked) {
+        return false;
+      }
+      return true;
+    }
+  }
+};
+/**
+ * Function that returns the origin and desination squares of the King and the Rook castling
+ * as Element
+ */
+const getCastlingSquares = (piece, dest, documentHTML) => {
+  let KingsOrigin;
+  let KingsDest;
+  let RooksOrigin;
+  let RooksDest;
+  if (piece === 'K') {
+    KingsOrigin = documentHTML.querySelector('#e1');
+    if (dest === 'g1' || dest === 'h1') {
+      // if the white King is castling Kingside, its destination square should be g1
+      // and the Rook should go to f1
+      KingsDest = documentHTML.querySelector('#g1');
+      RooksOrigin = documentHTML.querySelector('#h1');
+      RooksDest = documentHTML.querySelector('#f1');
+    }
+    else if (dest === 'c1' || dest === 'a1') {
+      // if the white King is castling Queenside, its destination square should be c1
+      // and the Rook should go to d1
+      KingsDest = documentHTML.querySelector('#c1');
+      RooksOrigin = documentHTML.querySelector('#a1');
+      RooksDest = documentHTML.querySelector('#d1');
+    }
+  }
+  else if (piece === 'k') {
+    KingsOrigin = documentHTML.querySelector('#e8');
+    if (dest === 'g8' || dest === 'h8') {
+      // if the black King is castling Kingside, its destination square should be g8
+      // and the Rook should go to f8
+      KingsDest = documentHTML.querySelector('#g8');
+      RooksOrigin = documentHTML.querySelector('#h8');
+      RooksDest = documentHTML.querySelector('#f8');
+    }
+    else if (dest === 'c8' || dest === 'a8') {
+      // if the black King is castling Queenside, its destination square should be c8
+      // and the Rook should go to d8
+      KingsDest = documentHTML.querySelector('#c8');
+      RooksOrigin = documentHTML.querySelector('#a8');
+      RooksDest = documentHTML.querySelector('#d8');
+    }
+  }
+  return [KingsOrigin, KingsDest, RooksOrigin, RooksDest];
+};
+
 class Validator {
   constructor() {
     // Declarations of properties that will hold various states of the game
@@ -599,6 +728,10 @@ class Validator {
     this.movingPiecesColor = '';
     this.canWhiteEnPassant = [false, ''];
     this.canBlackEnPassant = [false, ''];
+    this.canWhiteCastleKingSide = true;
+    this.canWhiteCastleQueenSide = true;
+    this.canBlackCastleKingSide = true;
+    this.canBlackCastleQueenSide = true;
   }
   /**
    * Method to run after each move that updates the game's various states
@@ -620,22 +753,24 @@ class Validator {
     // tempHoldColor holds the previous color value
     let tempHoldColor = this.movingPiecesColor;
     this.movingPiecesColor = getPieceColor(piece);
+    // Initialize the return values
     let isValid = false;
     let isEnPassant = false;
+    let isCastle = false;
     // Check if the moving piece matches the appropriate color's turn
     if (this.whitesTurn && this.movingPiecesColor !== 'w') {
-      return { isValid, isEnPassant };
+      return { isValid, isEnPassant, isCastle };
     }
     else if (!this.whitesTurn && this.movingPiecesColor !== 'b') {
-      return { isValid, isEnPassant };
+      return { isValid, isEnPassant, isCastle };
     }
     // Run the validator function for the moving piece
     switch (piece) {
       case `K`:
-        isValid = this.validateKingMove(origin, dest, `w`);
+        ({ isValid, isCastle } = this.validateKingMove(origin, dest, `w`));
         break;
       case 'k':
-        isValid = this.validateKingMove(origin, dest, `b`);
+        ({ isValid, isCastle } = this.validateKingMove(origin, dest, `b`));
         break;
       case `Q`:
         isValid = this.validateQueenMove(origin, dest, `w`);
@@ -673,18 +808,67 @@ class Validator {
       this.movingPiece = piece;
       this.movingPiecesOrigin = origin;
       this.movingPiecesDest = dest;
+      // Take away the King's castling rights after it moves
+      if (piece === 'K') {
+        this.canWhiteCastleKingSide = false;
+        this.canWhiteCastleQueenSide = false;
+      }
+      else if (piece === 'k') {
+        this.canBlackCastleKingSide = false;
+        this.canBlackCastleQueenSide = false;
+      }
+      // If the move is a castling move update the board accordingly
+      if (isCastle) {
+        if (piece === 'K') {
+          this.boardMap['e']['1'] = '';
+          if (dest === 'g1' || dest === 'h1') {
+            this.boardMap['g']['1'] = 'K';
+            this.boardMap['f']['1'] = 'R';
+            this.boardMap['h']['1'] = '';
+          }
+          else if (dest === 'c1' || dest === 'a1') {
+            this.boardMap['c']['1'] = 'K';
+            this.boardMap['d']['1'] = 'R';
+            this.boardMap['a']['1'] = '';
+          }
+        }
+        else if (piece === 'k') {
+          this.boardMap['e']['8'] = '';
+          if (dest === 'g8' || dest === 'h8') {
+            this.boardMap['g']['8'] = 'k';
+            this.boardMap['f']['8'] = 'r';
+            this.boardMap['h']['8'] = '';
+          }
+          else if (dest === 'c8' || dest === 'a8') {
+            this.boardMap['c']['8'] = 'k';
+            this.boardMap['d']['8'] = 'r';
+            this.boardMap['a']['8'] = '';
+          }
+        }
+        // Toggle the color's turn
+        this.whitesTurn = !this.whitesTurn;
+        return { isValid, isEnPassant, isCastle };
+      }
       if (!(piece === 'P' || piece === 'p')) {
         this.canBlackEnPassant = [false, ''];
         this.canWhiteEnPassant = [false, ''];
       }
+      if (isEnPassant) {
+        if (piece === 'P') {
+          this.boardMap[dest[0]][(parseInt(dest[1]) - 1).toString()] = '';
+        }
+        else if (piece === 'p') {
+          this.boardMap[dest[0]][(parseInt(dest[1]) + 1).toString()] = '';
+        }
+      }
       // Call the NewMove method to update the game's states
       this.NewMove();
-      return { isValid, isEnPassant };
+      return { isValid, isEnPassant, isCastle };
     }
     // If none of the checks returned true, that means that the move is invalid
     // Change the movingPieeColor's value to the previous color
     this.movingPiecesColor = tempHoldColor;
-    return { isValid, isEnPassant };
+    return { isValid, isEnPassant, isCastle };
   }
   /**
    * Validator method for the Pawn that checks if
@@ -844,33 +1028,41 @@ class Validator {
    * to an enemy protected square)
    */
   validateKingMove(origin, dest, color) {
+    let isValid = false;
     // Get the file and rank information and check they are correct
     const fileAndRankArray = getOriginAndDestInfo(origin, dest);
-    if (fileAndRankArray.includes(null)) {
-      console.log('invalid square input');
-      return false;
-    }
     // Get the information of the origin and destination squares and their differences
     const [originFile, originRank, destFile, destRank] = fileAndRankArray;
     const [fileDifference, rankDifference] = getFileAndRankDifferences(originFile, originRank, destFile, destRank);
+    // Check if the move is a castling move
+    const isCastle$1 = isCastle(origin, dest, color, this.boardMap, this.canWhiteCastleKingSide, this.canWhiteCastleQueenSide, this.canBlackCastleKingSide, this.canBlackCastleQueenSide);
     // If the move is more than one square then it is an illegal move
-    if (fileDifference !== 1 && rankDifference !== 1) {
-      return false;
+    if (rankDifference > 1) {
+      return { isValid, isCastle: isCastle$1 };
+    }
+    // The King can only move 2 files if it is a castling move
+    if (fileDifference > 1) {
+      if (isCastle$1) {
+        isValid = true;
+        return { isValid, isCastle: isCastle$1 };
+      }
+      return { isValid, isCastle: isCastle$1 };
     }
     /*
     The King moves exactly like the Queen except for only one square.
     So, after the one square rule is validated, the Queen's validator can be used
     for the King's move
      */
-    const isValidMove = this.validateQueenMove(origin, dest, color);
-    if (!isValidMove) {
-      return false;
+    isValid = this.validateQueenMove(origin, dest, color);
+    if (!isValid) {
+      return { isValid, isCastle: isCastle$1 };
     }
     if (isCheck(dest, color, this.boardMap)) {
-      return false;
+      isValid = false;
+      return { isValid, isCastle: isCastle$1 };
     }
     // if none of checks returned false, that means the move is valid
-    return true;
+    return { isValid, isCastle: isCastle$1 };
   }
   /**
    * Validator method for the Bishop that checks if
@@ -943,6 +1135,16 @@ class Validator {
         return false;
       }
     }
+    // If the Rook moves from its original square, take awau the
+    // castling rights of the King according to which Rook moved
+    if (origin === 'a1')
+      this.canWhiteCastleQueenSide = false;
+    if (origin === 'h1')
+      this.canWhiteCastleKingSide = false;
+    if (origin === 'a8')
+      this.canBlackCastleQueenSide = false;
+    if (origin === 'h8')
+      this.canBlackCastleKingSide = false;
     // if none of checks returned false, that means the move is valid
     return true;
   }
@@ -994,7 +1196,7 @@ const AnalysisBoard = class {
         const destSquare = square.id;
         const piece = pieceBeingDragged.id;
         // Validate the move
-        const { isValid, isEnPassant } = this.validator.ValidateMove(originSquare, destSquare, piece);
+        const { isValid, isEnPassant, isCastle } = this.validator.ValidateMove(originSquare, destSquare, piece);
         if (isValid) {
           // Get the square where the opposite Pawn moved 2 squares tp (which can get en passanted)
           // and remove that Pawn
@@ -1002,6 +1204,17 @@ const AnalysisBoard = class {
             const enPassantSquare = getEnPassantSquare(destSquare, piece, this.analysisBoardContainer);
             enPassantSquare.innerHTML = '';
             square.appendChild(pieceBeingDragged);
+            return;
+          }
+          // If the move is a castling move, change the King and the Rook's
+          // positions accordingly
+          if (isCastle && (piece === 'K' || piece === 'k')) {
+            const [KingsOrigin, KingsDest, RooksOrigin, RooksDest] = getCastlingSquares(piece, destSquare, this.analysisBoardContainer);
+            KingsOrigin.innerHTML = '';
+            KingsDest.appendChild(pieceBeingDragged);
+            const Rook = RooksOrigin.firstChild;
+            RooksOrigin.innerHTML = '';
+            RooksDest.appendChild(Rook);
             return;
           }
           square.innerHTML = '';
