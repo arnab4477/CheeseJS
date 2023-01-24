@@ -1163,7 +1163,12 @@ class Validator {
     if (color === objectedSquareInfo.color) {
       return false;
     }
-    // console.log('vushio');
+    // This makes sure the pieces cannot jump over the enemy pieces
+    if (objectedSquareInfo.color !== '' &&
+      objectedSquareInfo.color !== color &&
+      objectedSquareInfo.square !== dest) {
+      return false;
+    }
     // if none of checks returned false, that means the move is valid
     return true;
   }
@@ -1196,6 +1201,12 @@ class Validator {
       if (color === objectedSquareInfo.color) {
         return false;
       }
+      // This makes sure the pieces cannot jump over the enemy pieces
+      if (objectedSquareInfo.color !== '' &&
+        objectedSquareInfo.color !== color &&
+        objectedSquareInfo.square !== dest) {
+        return false;
+      }
     }
     // If the move is along ranks (vertically, like a1 to a8)
     else if (originFile === destFile) {
@@ -1204,6 +1215,12 @@ class Validator {
       // If the piece's color is same as the Rook
       // then the Rook cannot move through/to it
       if (color === objectedSquareInfo.color) {
+        return false;
+      }
+      // This makes sure the pieces cannot jump over the enemy pieces
+      if (objectedSquareInfo.color !== '' &&
+        objectedSquareInfo.color !== color &&
+        objectedSquareInfo.square !== dest) {
         return false;
       }
     }
