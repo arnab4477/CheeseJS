@@ -14,7 +14,11 @@ declare class Validator {
   /**
    * Method to run after each move that updates the game's various states
    */
-  private NewMove;
+  PromotePawn(pieceToPromoteTo: string): void;
+  /**
+   * Method to run after each move that updates the game's various states
+   */
+  private newMove;
   /**
    Validator method that takes in a piece and runs the corresponding validator
    function for that piece (urrently only for the Queen)
@@ -23,6 +27,7 @@ declare class Validator {
     isValid: boolean;
     isEnPassant: boolean;
     isCastle: boolean;
+    isPromotion: boolean;
   };
   /**
    * Validator method for the Pawn that checks if

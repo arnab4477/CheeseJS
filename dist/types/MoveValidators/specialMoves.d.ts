@@ -11,3 +11,12 @@ export declare const isCastle: (origin: string, dest: string, color: any, boardM
  * as Element
  */
 export declare const getCastlingSquares: (piece: string, dest: string, documentHTML: HTMLElement) => Array<Element>;
+/**
+ * Function that returns if Pawn move is a Pawn promotion
+ */
+export declare const isPromotion: (color: string, destRank: string) => boolean;
+/**
+ * Function that returns an HTML element for the list for the pieces a Pawn can promote to
+ * according to its color
+ */
+export declare const createPawnPromotionHtmlElement: (rank: string) => Element;

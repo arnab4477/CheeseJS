@@ -220,3 +220,50 @@ export const getCastlingSquares = (
 
   return [KingsOrigin, KingsDest, RooksOrigin, RooksDest];
 };
+
+/**
+ * Function that returns if Pawn move is a Pawn promotion
+ */
+export const isPromotion = (color: string, destRank: string): boolean => {
+  // Pawns can only promote on the 8th and the 1st square (for white and black
+  // respectively)
+  if (!(destRank === '8' || destRank === '1')) return false;
+  if (color === 'w' && destRank === '8') return true;
+  if (color === 'b' && destRank === '1') return true;
+
+  return false;
+};
+
+/**
+ * Function that returns an HTML element for the list for the pieces a Pawn can promote to
+ * according to its color
+ */
+export const createPawnPromotionHtmlElement = (rank: string): Element => {
+  // Create HTML string for both the colors
+  const whitePromotionHtml = `<div class='promotion-list'>
+       <img id="Q" alt='white queen' class="piece promoting-piece" src=${'../assets/WQ.svg.png'}>
+       <img id="R" alt='white rook' class="piece promoting-piece" src=${'../assets/WR.svg.png'}>
+       <img id="B" alt='white bishop' class="piece promoting-piece" src=${'../assets/WB.svg.png'}>
+       <img id="N" alt='white knight' class="piece promoting-piece" src=${'../assets/WN.svg.png'}>
+     </div>`;
+
+  const blackPromotionHtml = `<div class='promotion-list'>
+      <img id="n" alt='black knight' class="piece promoting-piece" src=${'../assets/bn.svg.png'}>
+      <img id="b" alt='black bishop' class="piece promoting-piece" src=${'../assets/bb.svg.png'}>
+      <img id="r" alt='black rook' class="piece promoting-piece" src=${'../assets/br.svg.png'}>
+      <img id="q" alt='black queen' class="piece promoting-piece" src=${'../assets/bq.svg.png'}>
+     </div>`;
+
+  // Add the HTML strings above to a Wrapper element
+  // and extract it to return it as an individual element
+  const Wrapper = document.createElement('div');
+
+  if (rank === '8') {
+    Wrapper.innerHTML = whitePromotionHtml;
+    return Wrapper.firstElementChild;
+  }
+  if (rank === '1') {
+    Wrapper.innerHTML = blackPromotionHtml;
+    return Wrapper.firstElementChild;
+  }
+};

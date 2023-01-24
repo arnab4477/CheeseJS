@@ -716,6 +716,50 @@ const getCastlingSquares = (piece, dest, documentHTML) => {
   }
   return [KingsOrigin, KingsDest, RooksOrigin, RooksDest];
 };
+/**
+ * Function that returns if Pawn move is a Pawn promotion
+ */
+const isPromotion = (color, destRank) => {
+  // Pawns can only promote on the 8th and the 1st square (for white and black
+  // respectively)
+  if (!(destRank === '8' || destRank === '1'))
+    return false;
+  if (color === 'w' && destRank === '8')
+    return true;
+  if (color === 'b' && destRank === '1')
+    return true;
+  return false;
+};
+/**
+ * Function that returns an HTML element for the list for the pieces a Pawn can promote to
+ * according to its color
+ */
+const createPawnPromotionHtmlElement = (rank) => {
+  // Create HTML string for both the colors
+  const whitePromotionHtml = `<div class='promotion-list'>
+       <img id="Q" alt='white queen' class="piece promoting-piece" src=${'../assets/WQ.svg.png'}>
+       <img id="R" alt='white rook' class="piece promoting-piece" src=${'../assets/WR.svg.png'}>
+       <img id="B" alt='white bishop' class="piece promoting-piece" src=${'../assets/WB.svg.png'}>
+       <img id="N" alt='white knight' class="piece promoting-piece" src=${'../assets/WN.svg.png'}>
+     </div>`;
+  const blackPromotionHtml = `<div class='promotion-list'>
+      <img id="n" alt='black knight' class="piece promoting-piece" src=${'../assets/bn.svg.png'}>
+      <img id="b" alt='black bishop' class="piece promoting-piece" src=${'../assets/bb.svg.png'}>
+      <img id="r" alt='black rook' class="piece promoting-piece" src=${'../assets/br.svg.png'}>
+      <img id="q" alt='black queen' class="piece promoting-piece" src=${'../assets/bq.svg.png'}>
+     </div>`;
+  // Add the HTML strings above to a Wrapper element
+  // and extract it to return it as an individual element
+  const Wrapper = document.createElement('div');
+  if (rank === '8') {
+    Wrapper.innerHTML = whitePromotionHtml;
+    return Wrapper.firstElementChild;
+  }
+  if (rank === '1') {
+    Wrapper.innerHTML = blackPromotionHtml;
+    return Wrapper.firstElementChild;
+  }
+};
 
 class Validator {
   constructor() {
@@ -736,7 +780,17 @@ class Validator {
   /**
    * Method to run after each move that updates the game's various states
    */
-  NewMove() {
+  PromotePawn(pieceToPromoteTo) {
+    // Update the board map
+    const updatedBoardMap = updateBoardMap(pieceToPromoteTo, this.movingPiecesOrigin, this.movingPiecesDest, this.boardMap);
+    this.boardMap = JSON.parse(JSON.stringify(updatedBoardMap));
+    // Toggle the color's turn
+    this.whitesTurn = !this.whitesTurn;
+  }
+  /**
+   * Method to run after each move that updates the game's various states
+   */
+  newMove() {
     // Update the board map
     const updatedBoardMap = updateBoardMap(this.movingPiece, this.movingPiecesOrigin, this.movingPiecesDest, this.boardMap);
     this.boardMap = JSON.parse(JSON.stringify(updatedBoardMap));
@@ -757,12 +811,13 @@ class Validator {
     let isValid = false;
     let isEnPassant = false;
     let isCastle = false;
+    let isPromotion = false;
     // Check if the moving piece matches the appropriate color's turn
     if (this.whitesTurn && this.movingPiecesColor !== 'w') {
-      return { isValid, isEnPassant, isCastle };
+      return { isValid, isEnPassant, isCastle, isPromotion };
     }
     else if (!this.whitesTurn && this.movingPiecesColor !== 'b') {
-      return { isValid, isEnPassant, isCastle };
+      return { isValid, isEnPassant, isCastle, isPromotion };
     }
     // Run the validator function for the moving piece
     switch (piece) {
@@ -797,10 +852,10 @@ class Validator {
         isValid = this.validateKnightMove(origin, dest, `b`);
         break;
       case 'P':
-        ({ isValid, isEnPassant } = this.validatePawnMove(origin, dest, `w`));
+        ({ isValid, isEnPassant, isPromotion } = this.validatePawnMove(origin, dest, `w`));
         break;
       case 'p':
-        ({ isValid, isEnPassant } = this.validatePawnMove(origin, dest, `b`));
+        ({ isValid, isEnPassant, isPromotion } = this.validatePawnMove(origin, dest, `b`));
         break;
     }
     if (isValid) {
@@ -847,11 +902,10 @@ class Validator {
         }
         // Toggle the color's turn
         this.whitesTurn = !this.whitesTurn;
-        return { isValid, isEnPassant, isCastle };
+        return { isValid, isEnPassant, isCastle, isPromotion };
       }
-      if (!(piece === 'P' || piece === 'p')) {
-        this.canBlackEnPassant = [false, ''];
-        this.canWhiteEnPassant = [false, ''];
+      if (isPromotion) {
+        return { isValid, isEnPassant, isCastle, isPromotion };
       }
       if (isEnPassant) {
         if (piece === 'P') {
@@ -861,14 +915,18 @@ class Validator {
           this.boardMap[dest[0]][(parseInt(dest[1]) + 1).toString()] = '';
         }
       }
+      if (!(piece === 'P' || piece === 'p')) {
+        this.canBlackEnPassant = [false, ''];
+        this.canWhiteEnPassant = [false, ''];
+      }
       // Call the NewMove method to update the game's states
-      this.NewMove();
-      return { isValid, isEnPassant, isCastle };
+      this.newMove();
+      return { isValid, isEnPassant, isCastle, isPromotion };
     }
     // If none of the checks returned true, that means that the move is invalid
     // Change the movingPieeColor's value to the previous color
     this.movingPiecesColor = tempHoldColor;
-    return { isValid, isEnPassant, isCastle };
+    return { isValid, isEnPassant, isCastle, isPromotion };
   }
   /**
    * Validator method for the Pawn that checks if
@@ -879,27 +937,31 @@ class Validator {
   validatePawnMove(origin, dest, color) {
     // Get the file and rank information and check they are correct
     const fileAndRankArray = getOriginAndDestInfo(origin, dest);
+    let isValid = false;
+    let isEnPassant$1 = false;
+    let isPromotion$1 = false;
     if (fileAndRankArray.includes(null)) {
       console.log('invalid square input');
-      return { isValid: false, isEnPassant: false };
+      return { isValid, isEnPassant: isEnPassant$1, isPromotion: isPromotion$1 };
     }
     // Get the information of the origin and destination squares and their differences
     const [originFile, originRank, destFile, destRank] = fileAndRankArray;
     const [fileDifference, rankDifference] = getFileAndRankDifferences(originFile, originRank, destFile, destRank);
     // A Pawn cammot move diagonally or vertically more than 1 square
     if (fileDifference > 1 || rankDifference > 2) {
-      return { isValid: false, isEnPassant: false };
+      return { isValid, isEnPassant: isEnPassant$1, isPromotion: isPromotion$1 };
     }
     let objectedPieceColor = '';
-    const isEnPassant$1 = isEnPassant(destFile, originRank, destRank, color, this.boardMap);
+    isEnPassant$1 = isEnPassant(destFile, originRank, destRank, color, this.boardMap);
+    isPromotion$1 = isPromotion(color, destRank);
     if (color === 'w') {
       // Pawns can only move 2 squares from their initial position
       if (rankDifference === 2 && originRank !== '2') {
-        return { isValid: false, isEnPassant: false };
+        return { isValid, isEnPassant: isEnPassant$1, isPromotion: isPromotion$1 };
       }
       // White Pawns can only move up
       if (!(parseInt(destRank) > parseInt(originRank))) {
-        return { isValid: false, isEnPassant: false };
+        return { isValid, isEnPassant: isEnPassant$1, isPromotion: isPromotion$1 };
       }
       if (fileDifference === rankDifference) {
         if (isEnPassant$1 &&
@@ -907,30 +969,32 @@ class Validator {
           this.boardMap[destFile][destRank] === '' &&
           destFile === this.canWhiteEnPassant[1]) {
           this.canWhiteEnPassant = [false, ''];
-          return { isValid: true, isEnPassant: true };
+          isValid = true;
+          return { isValid, isEnPassant: isEnPassant$1, isPromotion: isPromotion$1 };
         }
         // A Pawn can only move diagonally if it is capturing an enemy piece
         if (getPieceColor(this.boardMap[destFile][destRank]) === 'b') {
-          return { isValid: true, isEnPassant: false };
+          isValid = true;
+          return { isValid, isEnPassant: isEnPassant$1, isPromotion: isPromotion$1 };
         }
         else {
-          return { isValid: false, isEnPassant: false };
+          return { isValid, isEnPassant: isEnPassant$1, isPromotion: isPromotion$1 };
         }
       }
       objectedPieceColor = checkThroughFile(originRank, destRank, originFile, this.boardMap).color;
       // Pawns can only move forward if the square is empty
       if (objectedPieceColor !== '') {
-        return { isValid: false, isEnPassant: false };
+        return { isValid, isEnPassant: isEnPassant$1, isPromotion: isPromotion$1 };
       }
     }
     else if (color === 'b') {
       // Pawns can only move 2 squares from their initial position
       if (rankDifference === 2 && originRank !== '7') {
-        return { isValid: false, isEnPassant: false };
+        return { isValid, isEnPassant: isEnPassant$1, isPromotion: isPromotion$1 };
       }
       // Black Pawns can only move down
       if (!(parseInt(destRank) < parseInt(originRank))) {
-        return { isValid: false, isEnPassant: false };
+        return { isValid, isEnPassant: isEnPassant$1, isPromotion: isPromotion$1 };
       }
       if (fileDifference === rankDifference) {
         if (isEnPassant$1 &&
@@ -938,20 +1002,22 @@ class Validator {
           this.boardMap[destFile][destRank] === '' &&
           destFile === this.canBlackEnPassant[1]) {
           this.canBlackEnPassant = [false, ''];
-          return { isValid: true, isEnPassant: true };
+          isValid = true;
+          return { isValid, isEnPassant: isEnPassant$1, isPromotion: isPromotion$1 };
         }
         // A Pawn can only move diagonally if it is capturing an enemy piece
         if (getPieceColor(this.boardMap[destFile][destRank]) === 'w') {
-          return { isValid: true, isEnPassant: false };
+          isValid = true;
+          return { isValid, isEnPassant: isEnPassant$1, isPromotion: isPromotion$1 };
         }
         else {
-          return { isValid: false, isEnPassant: false };
+          return { isValid, isEnPassant: isEnPassant$1, isPromotion: isPromotion$1 };
         }
       }
       objectedPieceColor = checkThroughFile(originRank, destRank, originFile, this.boardMap).color;
       // Pawns can only move forward if the square is empty
       if (objectedPieceColor !== '') {
-        return { isValid: false, isEnPassant: false };
+        return { isValid, isEnPassant: isEnPassant$1, isPromotion: isPromotion$1 };
       }
     }
     if (rankDifference === 2) {
@@ -966,7 +1032,8 @@ class Validator {
       this.canWhiteEnPassant = [false, ''];
       this.canBlackEnPassant = [false, ''];
     }
-    return { isValid: true, isEnPassant: false };
+    isValid = true;
+    return { isValid, isEnPassant: isEnPassant$1, isPromotion: isPromotion$1 };
   }
   /**
    * Validator method for the Knight that checks if
@@ -1150,7 +1217,7 @@ class Validator {
   }
 }
 
-const analysisBoardCss = "#analysis-board-container{position:relative;width:400px;height:400px;border:1px solid black}.row{display:flex;flex-direction:row;width:100%;height:50px}.square{width:50px;height:50px;border:0.1px black}.piece{display:flex;justify-content:center;align-items:center;touch-action:none}.invisible{display:none}@media (max-width: 550px){#analysis-board-container{width:280px;height:280px}.row{height:35px}.square{width:35px;height:35px}}";
+const analysisBoardCss = "#analysis-board-container{position:relative;width:400px;height:400px;border:1px solid black}.row{display:flex;flex-direction:row;width:100%;height:50px}.promotion-list{display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:10;height:200px;width:50px}.square{width:50px;height:50px;border:0.1px black}.list-squares{width:50px;height:50px;border:0.1px black;background-color:lightgray}.piece{display:flex;justify-content:center;align-items:center;touch-action:none;cursor:grab;cursor:move}.promoting-piece{background-color:gray}.piece:active{cursor:grabbing}.invisible{display:none}@media (max-width: 550px){#analysis-board-container{width:280px;height:280px}.row{height:35px}.square{width:35px;height:35px}}";
 
 const AnalysisBoard = class {
   constructor(hostRef) {
@@ -1165,7 +1232,7 @@ const AnalysisBoard = class {
     // Set the inner HTML of the checkerboard container to the HTML string for the checkered board
     this.analysisBoardContainer.innerHTML = generateChessBoard(this.light, this.dark, 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR');
     // Get all the pieces and squares in the chess board
-    const pieces = this.analysisBoardContainer.querySelectorAll('.piece');
+    const pieces = Array.from(this.analysisBoardContainer.querySelectorAll('.piece'));
     const squares = this.analysisBoardContainer.querySelectorAll('.square');
     // Add drag and drop event listeners to each piece
     pieces.forEach((piece) => {
@@ -1192,11 +1259,11 @@ const AnalysisBoard = class {
         // Get the HTML element being dragged
         const pieceBeingDragged = this.analysisBoardContainer.querySelector('.dragging');
         // Get the info for the piece, its origin and destination square
-        const originSquare = pieceBeingDragged.parentElement.id;
+        const originSquareElemet = pieceBeingDragged.parentElement;
         const destSquare = square.id;
         const piece = pieceBeingDragged.id;
         // Validate the move
-        const { isValid, isEnPassant, isCastle } = this.validator.ValidateMove(originSquare, destSquare, piece);
+        const { isValid, isEnPassant, isCastle, isPromotion } = this.validator.ValidateMove(originSquareElemet.id, destSquare, piece);
         if (isValid) {
           // Get the square where the opposite Pawn moved 2 squares tp (which can get en passanted)
           // and remove that Pawn
@@ -1212,15 +1279,68 @@ const AnalysisBoard = class {
             const [KingsOrigin, KingsDest, RooksOrigin, RooksDest] = getCastlingSquares(piece, destSquare, this.analysisBoardContainer);
             KingsOrigin.innerHTML = '';
             KingsDest.appendChild(pieceBeingDragged);
-            const Rook = RooksOrigin.firstChild;
+            const Rook = RooksOrigin.firstElementChild;
             RooksOrigin.innerHTML = '';
             RooksDest.appendChild(Rook);
+            return;
+          }
+          if (isPromotion) {
+            // Delete the pawn from the square it was on before the promotion
+            pieceBeingDragged.remove();
+            originSquareElemet.innerHTML = '';
+            const promotionRank = destSquare[1];
+            const promotionRankElement = square.parentElement;
+            // For the black Pawn's promotion, the list will be displayed
+            // starting from 3 squares above so that list ends on the promotion
+            // square. Get the temprary elements and its info if only the
+            // promoting pawn is a black Pawn
+            let temporaryReplaceSquareRank = '';
+            let temporaryReplaceSquare;
+            let temporaryReplaceRankElement;
+            if (piece === 'p') {
+              temporaryReplaceSquareRank = (parseInt(destSquare[1]) + 3).toString();
+              temporaryReplaceSquare =
+                this.analysisBoardContainer.querySelector(`#${destSquare[0] + temporaryReplaceSquareRank}`);
+              temporaryReplaceRankElement =
+                temporaryReplaceSquare.parentElement;
+            }
+            // Get the list of the pieces that cane be promoted to and replace it with
+            // with the appropriate square
+            const list = createPawnPromotionHtmlElement(promotionRank);
+            piece === 'P'
+              ? promotionRankElement.replaceChild(list, square)
+              : temporaryReplaceRankElement.replaceChild(list, temporaryReplaceSquare);
+            // This event listner runs when a piece from the list is clicked
+            list.addEventListener('click', (e) => {
+              // Get the selected piece, remove its promoting class and
+              // add the same attributes as a normal piece
+              const pieceToPromoteTo = e.target;
+              pieceToPromoteTo.classList.remove('promoting-piece');
+              pieceToPromoteTo.setAttribute('draggable', 'true');
+              // Set the same dragging event listeners to the promoted piece as a normal piece
+              pieceToPromoteTo.addEventListener('dragstart', () => {
+                setTimeout(() => {
+                  pieceToPromoteTo.classList.add('dragging', 'invisible');
+                }, 0);
+              });
+              pieceToPromoteTo.addEventListener('dragend', () => {
+                pieceToPromoteTo.classList.remove('dragging', 'invisible');
+              });
+              // Add the promoted piece to its promoted square and replace the
+              // list element with original square element according to color
+              square.innerHTML = '';
+              square.appendChild(pieceToPromoteTo);
+              piece === 'P'
+                ? promotionRankElement.replaceChild(square, list)
+                : temporaryReplaceRankElement.replaceChild(temporaryReplaceSquare, list);
+              // Update the boardMap with the new promoted piece
+              this.validator.PromotePawn(pieceToPromoteTo.id);
+            });
             return;
           }
           square.innerHTML = '';
           square.appendChild(pieceBeingDragged);
         }
-        return;
       });
     });
   }
