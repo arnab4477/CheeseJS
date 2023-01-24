@@ -22,6 +22,8 @@ class Validator {
   private canBlackCastleKingSide: boolean = true;
   private canBlackCastleQueenSide: boolean = true;
 
+  public IsPromoting: boolean = false;
+
   /**
    * Method to run after a Pawn promotion that updates the game's states
    */
@@ -88,6 +90,11 @@ class Validator {
     if (this.whitesTurn && this.movingPiecesColor !== 'w') {
       return { isValid, isEnPassant, isCastle, isPromotion };
     } else if (!this.whitesTurn && this.movingPiecesColor !== 'b') {
+      return { isValid, isEnPassant, isCastle, isPromotion };
+    }
+
+    // Check if a Pawn is promoting while this move is played
+    if (this.IsPromoting) {
       return { isValid, isEnPassant, isCastle, isPromotion };
     }
 

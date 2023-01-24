@@ -11,12 +11,13 @@ declare class Validator {
   private canWhiteCastleQueenSide;
   private canBlackCastleKingSide;
   private canBlackCastleQueenSide;
+  IsPromoting: boolean;
   /**
-   * Method to run after each move that updates the game's various states
+   * Method to run after a Pawn promotion that updates the game's states
    */
   PromotePawn(pieceToPromoteTo: string): void;
   /**
-   * Method to run after each move that updates the game's various states
+   * Method to run after each move that updates the game's states
    */
   private newMove;
   /**

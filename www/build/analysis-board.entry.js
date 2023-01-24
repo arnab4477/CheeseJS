@@ -776,9 +776,10 @@ class Validator {
     this.canWhiteCastleQueenSide = true;
     this.canBlackCastleKingSide = true;
     this.canBlackCastleQueenSide = true;
+    this.IsPromoting = false;
   }
   /**
-   * Method to run after each move that updates the game's various states
+   * Method to run after a Pawn promotion that updates the game's states
    */
   PromotePawn(pieceToPromoteTo) {
     // Update the board map
@@ -788,7 +789,7 @@ class Validator {
     this.whitesTurn = !this.whitesTurn;
   }
   /**
-   * Method to run after each move that updates the game's various states
+   * Method to run after each move that updates the game's states
    */
   newMove() {
     // Update the board map
@@ -817,6 +818,10 @@ class Validator {
       return { isValid, isEnPassant, isCastle, isPromotion };
     }
     else if (!this.whitesTurn && this.movingPiecesColor !== 'b') {
+      return { isValid, isEnPassant, isCastle, isPromotion };
+    }
+    // Check if a Pawn is promoting while this move is played
+    if (this.IsPromoting) {
       return { isValid, isEnPassant, isCastle, isPromotion };
     }
     // Run the validator function for the moving piece
@@ -919,7 +924,7 @@ class Validator {
         this.canBlackEnPassant = [false, ''];
         this.canWhiteEnPassant = [false, ''];
       }
-      // Call the NewMove method to update the game's states
+      // Call the newMove method to update the game's states
       this.newMove();
       return { isValid, isEnPassant, isCastle, isPromotion };
     }
@@ -1232,7 +1237,7 @@ const AnalysisBoard = class {
     // Set the inner HTML of the checkerboard container to the HTML string for the checkered board
     this.analysisBoardContainer.innerHTML = generateChessBoard(this.light, this.dark, 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR');
     // Get all the pieces and squares in the chess board
-    const pieces = Array.from(this.analysisBoardContainer.querySelectorAll('.piece'));
+    const pieces = this.analysisBoardContainer.querySelectorAll('.piece');
     const squares = this.analysisBoardContainer.querySelectorAll('.square');
     // Add drag and drop event listeners to each piece
     pieces.forEach((piece) => {
@@ -1259,11 +1264,11 @@ const AnalysisBoard = class {
         // Get the HTML element being dragged
         const pieceBeingDragged = this.analysisBoardContainer.querySelector('.dragging');
         // Get the info for the piece, its origin and destination square
-        const originSquareElemet = pieceBeingDragged.parentElement;
+        const originSquare = pieceBeingDragged.parentElement.id;
         const destSquare = square.id;
         const piece = pieceBeingDragged.id;
         // Validate the move
-        const { isValid, isEnPassant, isCastle, isPromotion } = this.validator.ValidateMove(originSquareElemet.id, destSquare, piece);
+        const { isValid, isEnPassant, isCastle, isPromotion } = this.validator.ValidateMove(originSquare, destSquare, piece);
         if (isValid) {
           // Get the square where the opposite Pawn moved 2 squares tp (which can get en passanted)
           // and remove that Pawn
@@ -1285,9 +1290,10 @@ const AnalysisBoard = class {
             return;
           }
           if (isPromotion) {
+            // Toggle the IsPromoting state to true
+            this.validator.IsPromoting = true;
             // Delete the pawn from the square it was on before the promotion
             pieceBeingDragged.remove();
-            originSquareElemet.innerHTML = '';
             const promotionRank = destSquare[1];
             const promotionRankElement = square.parentElement;
             // For the black Pawn's promotion, the list will be displayed
@@ -1335,6 +1341,8 @@ const AnalysisBoard = class {
                 : temporaryReplaceRankElement.replaceChild(temporaryReplaceSquare, list);
               // Update the boardMap with the new promoted piece
               this.validator.PromotePawn(pieceToPromoteTo.id);
+              // Toggle the IsPromoting state to false
+              this.validator.IsPromoting = false;
             });
             return;
           }

@@ -29,9 +29,7 @@ export class AnalysisBoard implements ComponentDidLoad {
     );
 
     // Get all the pieces and squares in the chess board
-    const pieces = Array.from(
-      this.analysisBoardContainer.querySelectorAll('.piece')
-    );
+    const pieces = this.analysisBoardContainer.querySelectorAll('.piece');
     const squares = this.analysisBoardContainer.querySelectorAll('.square');
 
     // Add drag and drop event listeners to each piece
@@ -64,13 +62,13 @@ export class AnalysisBoard implements ComponentDidLoad {
           this.analysisBoardContainer.querySelector('.dragging');
 
         // Get the info for the piece, its origin and destination square
-        const originSquareElemet = pieceBeingDragged.parentElement;
+        const originSquare = pieceBeingDragged.parentElement.id;
         const destSquare = square.id;
         const piece = pieceBeingDragged.id;
 
         // Validate the move
         const { isValid, isEnPassant, isCastle, isPromotion } =
-          this.validator.ValidateMove(originSquareElemet.id, destSquare, piece);
+          this.validator.ValidateMove(originSquare, destSquare, piece);
 
         if (isValid) {
           // Get the square where the opposite Pawn moved 2 squares tp (which can get en passanted)
@@ -107,9 +105,11 @@ export class AnalysisBoard implements ComponentDidLoad {
           }
 
           if (isPromotion) {
+            // Toggle the IsPromoting state to true
+            this.validator.IsPromoting = true;
+
             // Delete the pawn from the square it was on before the promotion
             pieceBeingDragged.remove();
-            originSquareElemet.innerHTML = '';
 
             const promotionRank = destSquare[1];
             const promotionRankElement = square.parentElement;
@@ -175,6 +175,9 @@ export class AnalysisBoard implements ComponentDidLoad {
 
               // Update the boardMap with the new promoted piece
               this.validator.PromotePawn(pieceToPromoteTo.id);
+
+              // Toggle the IsPromoting state to false
+              this.validator.IsPromoting = false;
             });
 
             return;
