@@ -391,6 +391,24 @@ const getFileAndRank = (square) => {
 };
 
 /**
+ * Function that returns if the King is safe from checks after a move is
+ * played, If it returns false, then the move cannot be played as then the
+ * King can be captured
+ */
+const isSafe = (piece, origin, dest, whiteKingsPosition, blackKingsPosition, boardMap) => {
+  const updatedBoardMap = updateBoardMap(piece, origin, dest, boardMap);
+  const color = getPieceColor(piece);
+  // After the move has been played and the temporary board has been
+  // updated, see if the new position takes the King into check and return
+  // the opposite of it (as the opposite of being checked is being safe)
+  if (color === 'w') {
+    return !isCheck(whiteKingsPosition, 'w', updatedBoardMap);
+  }
+  if (color === 'b') {
+    return !isCheck(blackKingsPosition, 'b', updatedBoardMap);
+  }
+};
+/**
  * Function that checks in a file according to the given direction if there are
  * any piece on the way which can give the King a check
  * @param direction must be either "up" or "down"
@@ -777,6 +795,8 @@ class Validator {
     this.canBlackCastleKingSide = true;
     this.canBlackCastleQueenSide = true;
     this.IsPromoting = false;
+    this.whiteKingsPosition = 'e1';
+    this.blackKingsPosition = 'e8';
   }
   /**
    * Method to run after a Pawn promotion that updates the game's states
@@ -806,7 +826,7 @@ class Validator {
     // Tempporarily change the movingPieceColor to the moving piece's color
     // If the move is invalid, thecolor will be changed back to the previous one
     // tempHoldColor holds the previous color value
-    let tempHoldColor = this.movingPiecesColor;
+    let tempColor = this.movingPiecesColor;
     this.movingPiecesColor = getPieceColor(piece);
     // Initialize the return values
     let isValid = false;
@@ -824,7 +844,7 @@ class Validator {
     if (this.IsPromoting) {
       return { isValid, isEnPassant, isCastle, isPromotion };
     }
-    // Run the validator function for the moving piece
+    // Run the appropriate validator function for the moving piece
     switch (piece) {
       case `K`:
         ({ isValid, isCastle } = this.validateKingMove(origin, dest, `w`));
@@ -864,18 +884,24 @@ class Validator {
         break;
     }
     if (isValid) {
-      // Set the info of the moving piece to the states
-      this.movingPiece = piece;
-      this.movingPiecesOrigin = origin;
-      this.movingPiecesDest = dest;
-      // Take away the King's castling rights after it moves
+      // Take away the King's castling rights after it moves and updates its position
       if (piece === 'K') {
+        this.whiteKingsPosition = dest;
         this.canWhiteCastleKingSide = false;
         this.canWhiteCastleQueenSide = false;
       }
       else if (piece === 'k') {
+        this.blackKingsPosition = dest;
         this.canBlackCastleKingSide = false;
         this.canBlackCastleQueenSide = false;
+      }
+      // Copy of the boardMap to temprarily make the move and update the board
+      const tempBoardMap = JSON.parse(JSON.stringify(this.boardMap));
+      // Check if the King would be safe if the move is played
+      // If the King is not safe, the move is not valid
+      const isKingSafeAfterTheMove = isSafe(piece, origin, dest, this.whiteKingsPosition, this.blackKingsPosition, tempBoardMap);
+      if (!isKingSafeAfterTheMove) {
+        return { isValid: false, isEnPassant, isCastle, isPromotion };
       }
       // If the move is a castling move update the board accordingly
       if (isCastle) {
@@ -924,13 +950,17 @@ class Validator {
         this.canBlackEnPassant = [false, ''];
         this.canWhiteEnPassant = [false, ''];
       }
+      // Set the info of the moving piece to the states
+      this.movingPiece = piece;
+      this.movingPiecesOrigin = origin;
+      this.movingPiecesDest = dest;
       // Call the newMove method to update the game's states
       this.newMove();
       return { isValid, isEnPassant, isCastle, isPromotion };
     }
     // If none of the checks returned true, that means that the move is invalid
     // Change the movingPieeColor's value to the previous color
-    this.movingPiecesColor = tempHoldColor;
+    this.movingPiecesColor = tempColor;
     return { isValid, isEnPassant, isCastle, isPromotion };
   }
   /**

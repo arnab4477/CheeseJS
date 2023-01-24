@@ -1,5 +1,11 @@
 import { BoardType } from '../BoardTypes';
 /**
+ * Function that returns if the King is safe from checks after a move is
+ * played, If it returns false, then the move cannot be played as then the
+ * King can be captured
+ */
+export declare const isSafe: (piece: string, origin: string, dest: string, whiteKingsPosition: string, blackKingsPosition: string, boardMap: BoardType) => boolean;
+/**
  * Function that checks in a file according to the given direction if there are
  * any piece on the way which can give the King a check
  * @param direction must be either "up" or "down"

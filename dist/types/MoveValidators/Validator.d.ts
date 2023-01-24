@@ -12,6 +12,8 @@ declare class Validator {
   private canBlackCastleKingSide;
   private canBlackCastleQueenSide;
   IsPromoting: boolean;
+  private whiteKingsPosition;
+  private blackKingsPosition;
   /**
    * Method to run after a Pawn promotion that updates the game's states
    */

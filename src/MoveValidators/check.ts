@@ -2,6 +2,34 @@ import * as helpers from './validatorHelper';
 import { BoardType } from '../BoardTypes';
 
 /**
+ * Function that returns if the King is safe from checks after a move is
+ * played, If it returns false, then the move cannot be played as then the
+ * King can be captured
+ */
+export const isSafe = (
+  piece: string,
+  origin: string,
+  dest: string,
+  whiteKingsPosition: string,
+  blackKingsPosition: string,
+  boardMap: BoardType
+): boolean => {
+  const updatedBoardMap = helpers.updateBoardMap(piece, origin, dest, boardMap);
+  const color = helpers.getPieceColor(piece);
+
+  // After the move has been played and the temporary board has been
+  // updated, see if the new position takes the King into check and return
+  // the opposite of it (as the opposite of being checked is being safe)
+  if (color === 'w') {
+    return !isCheck(whiteKingsPosition, 'w', updatedBoardMap);
+  }
+
+  if (color === 'b') {
+    return !isCheck(blackKingsPosition, 'b', updatedBoardMap);
+  }
+};
+
+/**
  * Function that checks in a file according to the given direction if there are
  * any piece on the way which can give the King a check
  * @param direction must be either "up" or "down"
