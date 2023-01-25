@@ -426,6 +426,12 @@ const checkVertically = (file, rank, color, direction, boardMap) => {
   }
   else if (direction === 'down') {
     objectedSquareInfo = checkThroughFile(rank, '1', file, boardMap);
+    if (color === 'w' && objectedSquareInfo.piece === 'K') {
+      objectedSquareInfo = checkThroughFile((parseInt(rank) - 2).toString(), '1', file, boardMap);
+    }
+    if (color === 'b' && objectedSquareInfo.piece === 'k') {
+      objectedSquareInfo = checkThroughFile((parseInt(rank) - 2).toString(), '1', file, boardMap);
+    }
   }
   // Check if the objected piece is on the adjaent square
   if (isAdjacent(file + rank, objectedSquareInfo.square)) {
@@ -575,7 +581,7 @@ const checkDiagonally = (file, rank, color, direction, boardMap) => {
     piece: '',
     color: '',
   };
-  // Check if the objected piece is on the adjaent square
+  // Check if an enemy piece is on the way through the diagonal
   objectedSquareInfo = checkThroughDiagonals(file, diagonalEdgeFile, rank, diagonalEdgeRank, boardMap);
   // Check if the objected piece is on the adjaent square
   if (isAdjacent(file + rank, objectedSquareInfo.square)) {
@@ -887,16 +893,19 @@ class Validator {
    function for that piece (urrently only for the Queen)
   */
   ValidateMove(origin, dest, piece) {
-    // Tempporarily change the movingPieceColor to the moving piece's color
-    // If the move is invalid, thecolor will be changed back to the previous one
-    // tempHoldColor holds the previous color value
-    let tempColor = this.movingPiecesColor;
-    this.movingPiecesColor = getPieceColor(piece);
     // Initialize the return values
     let isValid = false;
     let isEnPassant = false;
     let isCastle = false;
     let isPromotion = false;
+    if (origin === dest) {
+      return { isValid, isEnPassant, isCastle, isPromotion };
+    }
+    // Tempporarily change the movingPieceColor to the moving piece's color
+    // If the move is invalid, thecolor will be changed back to the previous one
+    // tempHoldColor holds the previous color value
+    let tempColor = this.movingPiecesColor;
+    this.movingPiecesColor = getPieceColor(piece);
     // Check if the moving piece matches the appropriate color's turn
     if (this.whitesTurn && this.movingPiecesColor !== 'w') {
       return { isValid, isEnPassant, isCastle, isPromotion };

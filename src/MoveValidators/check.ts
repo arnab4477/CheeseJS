@@ -53,6 +53,22 @@ export const checkVertically = (
     objectedSquareInfo = helpers.checkThroughFile(rank, '8', file, boardMap);
   } else if (direction === 'down') {
     objectedSquareInfo = helpers.checkThroughFile(rank, '1', file, boardMap);
+    if (color === 'w' && objectedSquareInfo.piece === 'K') {
+      objectedSquareInfo = helpers.checkThroughFile(
+        (parseInt(rank) - 2).toString(),
+        '1',
+        file,
+        boardMap
+      );
+    }
+    if (color === 'b' && objectedSquareInfo.piece === 'k') {
+      objectedSquareInfo = helpers.checkThroughFile(
+        (parseInt(rank) - 2).toString(),
+        '1',
+        file,
+        boardMap
+      );
+    }
   }
 
   // Check if the objected piece is on the adjaent square
@@ -78,6 +94,7 @@ export const checkVertically = (
     ['Q', 'R'],
     ['q', 'r']
   );
+
   if (isCheck) {
     return true;
   }
@@ -264,7 +281,7 @@ export const checkDiagonally = (
     color: '',
   };
 
-  // Check if the objected piece is on the adjaent square
+  // Check if an enemy piece is on the way through the diagonal
   objectedSquareInfo = helpers.checkThroughDiagonals(
     file,
     diagonalEdgeFile,

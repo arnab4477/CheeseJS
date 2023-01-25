@@ -77,17 +77,21 @@ class Validator {
     isCastle: boolean;
     isPromotion: boolean;
   } {
-    // Tempporarily change the movingPieceColor to the moving piece's color
-    // If the move is invalid, thecolor will be changed back to the previous one
-    // tempHoldColor holds the previous color value
-    let tempColor = this.movingPiecesColor;
-    this.movingPiecesColor = helpers.getPieceColor(piece);
-
     // Initialize the return values
     let isValid: boolean = false;
     let isEnPassant: boolean = false;
     let isCastle: boolean = false;
     let isPromotion: boolean = false;
+
+    if (origin === dest) {
+      return { isValid, isEnPassant, isCastle, isPromotion };
+    }
+
+    // Tempporarily change the movingPieceColor to the moving piece's color
+    // If the move is invalid, thecolor will be changed back to the previous one
+    // tempHoldColor holds the previous color value
+    let tempColor = this.movingPiecesColor;
+    this.movingPiecesColor = helpers.getPieceColor(piece);
 
     // Check if the moving piece matches the appropriate color's turn
     if (this.whitesTurn && this.movingPiecesColor !== 'w') {
