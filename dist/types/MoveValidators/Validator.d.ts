@@ -1,3 +1,7 @@
+/**
+ * The main move validator class that contains the methods for validating
+ * all the moves and contains all the states of the game
+ */
 declare class Validator {
   private boardMap;
   private whitesTurn;
@@ -24,7 +28,7 @@ declare class Validator {
   private newMove;
   /**
    Validator method that takes in a piece and runs the corresponding validator
-   function for that piece (urrently only for the Queen)
+   function for that piece
   */
   ValidateMove(origin: string, dest: string, piece: string): {
     isValid: boolean;
@@ -34,44 +38,32 @@ declare class Validator {
   };
   /**
    * Validator method for the Pawn that checks if
-   * the square the Pawn is trying to move to is legal.
-   * As of now it does not check for any special rules (like moving
-   * while being pinned)
+   * the square the Pawn is trying to move to is legal
    */
   private validatePawnMove;
   /**
    * Validator method for the Knight that checks if
-   * the square the Knight is trying to move to is legal.
-   * As of now it does not check for any special rules (like moving
-   * while being pinned)
+   * the square the Knight is trying to move to is legal
    */
   private validateKnightMove;
   /**
    * Validator method for the Queen that checks if
-   * the square the Queen is trying to move to is legal.
-   * As of now it does not check for any special rules (like moving
-   * while being pinned)
+   * the square the Queen is trying to move to is legal
    */
   private validateQueenMove;
   /**
    * Validator method for the King that checks if
-   * the square the King is trying to move to is legal.
-   * As of now it does not check for any special rules (like moving
-   * to an enemy protected square)
+   * the square the King is trying to move to is legal
    */
   private validateKingMove;
   /**
    * Validator method for the Bishop that checks if
-   * the square the Bishop is trying to move to is legal.
-   * As of now it does not check for any special rules (like moving
-   * while being pinned)
+   * the square the Bishop is trying to move to is legal
    */
   private validateBishopMove;
   /**
    * Validator method for the Rook that checks if
-   * the square the Rook is trying to move to is legal.
-   * As of now it does not check for any special rules (like moving
-   * while being pinned)
+   * the square the Rook is trying to move to is legal
    */
   private validateRookMove;
 }

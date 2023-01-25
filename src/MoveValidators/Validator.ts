@@ -4,6 +4,10 @@ import * as helpers from './validatorHelper';
 import * as specials from './specialMoves';
 import { isCheck, isSafe } from './check';
 
+/**
+ * The main move validator class that contains the methods for validating
+ * all the moves and contains all the states of the game
+ */
 class Validator {
   // Declarations of properties that will hold various states of the game
   private boardMap: BoardType = fenToBoardMap();
@@ -65,7 +69,7 @@ class Validator {
 
   /**
    Validator method that takes in a piece and runs the corresponding validator
-   function for that piece (urrently only for the Queen) 
+   function for that piece
   */
   public ValidateMove(
     origin: string,
@@ -87,7 +91,7 @@ class Validator {
       return { isValid, isEnPassant, isCastle, isPromotion };
     }
 
-    // Tempporarily change the movingPieceColor to the moving piece's color
+    // Temporarily change the movingPieceColor to the moving piece's color
     // If the move is invalid, thecolor will be changed back to the previous one
     // tempHoldColor holds the previous color value
     let tempColor = this.movingPiecesColor;
@@ -250,9 +254,7 @@ class Validator {
 
   /**
    * Validator method for the Pawn that checks if
-   * the square the Pawn is trying to move to is legal.
-   * As of now it does not check for any special rules (like moving
-   * while being pinned)
+   * the square the Pawn is trying to move to is legal
    */
   private validatePawnMove(
     origin: string,
@@ -395,9 +397,7 @@ class Validator {
 
   /**
    * Validator method for the Knight that checks if
-   * the square the Knight is trying to move to is legal.
-   * As of now it does not check for any special rules (like moving
-   * while being pinned)
+   * the square the Knight is trying to move to is legal
    */
   private validateKnightMove(
     origin: string,
@@ -448,9 +448,7 @@ class Validator {
 
   /**
    * Validator method for the Queen that checks if
-   * the square the Queen is trying to move to is legal.
-   * As of now it does not check for any special rules (like moving
-   * while being pinned)
+   * the square the Queen is trying to move to is legal
    */
   private validateQueenMove(
     origin: string,
@@ -458,7 +456,7 @@ class Validator {
     color: string
   ): boolean {
     /*
-    The Queen is basically a Rook + a Bishop. So instead of writing
+    The Queen is basically a Rook plus a Bishop. So instead of writing
     a separate validator for the Queen, the same validators for the
     Rook and the Bishop can be used. If one of them return true then the
     move is valid,else it is invalid
@@ -476,9 +474,7 @@ class Validator {
 
   /**
    * Validator method for the King that checks if
-   * the square the King is trying to move to is legal.
-   * As of now it does not check for any special rules (like moving
-   * to an enemy protected square)
+   * the square the King is trying to move to is legal
    */
   private validateKingMove(
     origin: string,
@@ -546,9 +542,7 @@ class Validator {
 
   /**
    * Validator method for the Bishop that checks if
-   * the square the Bishop is trying to move to is legal.
-   * As of now it does not check for any special rules (like moving
-   * while being pinned)
+   * the square the Bishop is trying to move to is legal
    */
   private validateBishopMove(
     origin: string,
@@ -606,9 +600,7 @@ class Validator {
 
   /**
    * Validator method for the Rook that checks if
-   * the square the Rook is trying to move to is legal.
-   * As of now it does not check for any special rules (like moving
-   * while being pinned)
+   * the square the Rook is trying to move to is legal
    */
   private validateRookMove(
     origin: string,
