@@ -16,51 +16,51 @@ export const getPieceImage = (
     case PieceType.whitePawn:
       return `<div id="${
         BoardArray[rank][file]
-      }" class="square" style="background-color: ${color}"><img id="P" alt='white pawn' class="piece" draggable="true" src=${'../assets/WP.svg.png'} alt="abc"></div>`;
+      }" class="square" style="background-color: ${color}"><img id="P" alt='white pawn' class="piece" draggable="true" src=${'../assets/WP.svg.png'}></div>`;
     case PieceType.blackPawn:
       return `<div id="${
         BoardArray[rank][file]
-      }" class="square" style="background-color: ${color}"><img id="p" alt='black pawn' class="piece" draggable="true" src=${'../assets/bp.svg.png'} alt="abc"></div>`;
+      }" class="square" style="background-color: ${color}"><img id="p" alt='black pawn' class="piece" draggable="true" src=${'../assets/bp.svg.png'}></div>`;
     case PieceType.whiteRook:
       return `<div id="${
         BoardArray[rank][file]
-      }" class="square" style="background-color: ${color}"><img id="R" alt='white rook' class="piece" draggable="true" src=${'../assets/WR.svg.png'} alt="abc"></div>`;
+      }" class="square" style="background-color: ${color}"><img id="R" alt='white rook' class="piece" draggable="true" src=${'../assets/WR.svg.png'}></div>`;
     case PieceType.blackRook:
       return `<div id="${
         BoardArray[rank][file]
-      }" class="square" style="background-color: ${color}"><img id="r" alt='black rook' class="piece" draggable="true" src=${'../assets/br.svg.png'} alt="abc"></div>`;
+      }" class="square" style="background-color: ${color}"><img id="r" alt='black rook' class="piece" draggable="true" src=${'../assets/br.svg.png'}></div>`;
     case PieceType.whiteKnight:
       return `<div id="${
         BoardArray[rank][file]
-      }" class="square" style="background-color: ${color}"><img id="N" alt='white knight' class="piece" draggable="true" src=${'../assets/WN.svg.png'} alt="abc"></div>`;
+      }" class="square" style="background-color: ${color}"><img id="N" alt='white knight' class="piece" draggable="true" src=${'../assets/WN.svg.png'}></div>`;
     case PieceType.blackKnight:
       return `<div id="${
         BoardArray[rank][file]
-      }" class="square" style="background-color: ${color}"><img id="n" alt='black knight' class="piece" draggable="true" src=${'../assets/bn.svg.png'} alt="abc"></div>`;
+      }" class="square" style="background-color: ${color}"><img id="n" alt='black knight' class="piece" draggable="true" src=${'../assets/bn.svg.png'}></div>`;
     case PieceType.whiteBishop:
       return `<div id="${
         BoardArray[rank][file]
-      }" class="square" style="background-color: ${color}"><img id="B" alt='white bishop' class="piece" draggable="true" src=${'../assets/WB.svg.png'} alt="abc"></div>`;
+      }" class="square" style="background-color: ${color}"><img id="B" alt='white bishop' class="piece" draggable="true" src=${'../assets/WB.svg.png'}></div>`;
     case PieceType.blackBishop:
       return `<div id="${
         BoardArray[rank][file]
-      }" class="square" style="background-color: ${color}"><img id="b" alt='black bishop' class="piece" draggable="true" src=${'../assets/bb.svg.png'} alt="abc"></div>`;
+      }" class="square" style="background-color: ${color}"><img id="b" alt='black bishop' class="piece" draggable="true" src=${'../assets/bb.svg.png'}></div>`;
     case PieceType.whiteQueen:
       return `<div id="${
         BoardArray[rank][file]
-      }" class="square" style="background-color: ${color}"><img id="Q" alt='white queen' class="piece" draggable="true" src=${'../assets/WQ.svg.png'} alt="abc"></div>`;
+      }" class="square" style="background-color: ${color}"><img id="Q" alt='white queen' class="piece" draggable="true" src=${'../assets/WQ.svg.png'}></div>`;
     case PieceType.blackQueen:
       return `<div id="${
         BoardArray[rank][file]
-      }" class="square" style="background-color: ${color}"><img id="q" alt='black queen' class="piece" draggable="true" src=${'../assets/bq.svg.png'} alt="abc"></div>`;
+      }" class="square" style="background-color: ${color}"><img id="q" alt='black queen' class="piece" draggable="true" src=${'../assets/bq.svg.png'}></div>`;
     case PieceType.whiteKing:
       return `<div id="${
         BoardArray[rank][file]
-      }" class="square" style="background-color: ${color}"><img id="K" alt='white king' class="piece" draggable="true" src=${'../assets/WK.svg.png'} alt="abc"></div>`;
+      }" class="square" style="background-color: ${color}"><img id="K" alt='white king' class="piece" draggable="true" src=${'../assets/WK.svg.png'}></div>`;
     case PieceType.blackKing:
       return `<div id="${
         BoardArray[rank][file]
-      }" class="square" style="background-color: ${color}"><img id="k" alt='black king' class="piece" draggable="true" src=${'../assets/bk.svg.png'} alt="abc"></div>`;
+      }" class="square" style="background-color: ${color}"><img id="k" alt='black king' class="piece" draggable="true" src=${'../assets/bk.svg.png'}></div>`;
     default:
       return '';
   }

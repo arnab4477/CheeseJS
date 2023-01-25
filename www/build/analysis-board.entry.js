@@ -1,5 +1,5 @@
 import { r as registerInstance, h } from './index-96fdd9b9.js';
-import { f as fenToBoardMap, g as generateChessBoard } from './chessboard-65d4e5e3.js';
+import { f as fenToBoardMap, g as generateChessBoard } from './chessboard-dcac3949.js';
 import './BoardTypes-d86232b4.js';
 
 /**
