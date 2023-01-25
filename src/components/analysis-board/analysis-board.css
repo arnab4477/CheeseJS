@@ -1,4 +1,4 @@
-#chess-board-container {
+#analysis-board-container {
   position: relative;
   width: 400px;
   height: 400px;
@@ -13,10 +13,29 @@
   height: 50px;
 }
 
+.promotion-list {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  z-index: 10;
+
+  height: 200px;
+  width: 50px;
+}
+
 .square {
   width: 50px;
   height: 50px;
   border: 0.1px black;
+}
+
+.list-squares {
+  width: 50px;
+  height: 50px;
+  border: 0.1px black;
+  background-color: lightgray;
 }
 
 .piece {
@@ -25,6 +44,16 @@
   align-items: center;
 
   touch-action: none;
+  cursor: grab;
+  cursor: move;
+}
+
+.promoting-piece {
+  background-color: gray;
+}
+
+.piece:active {
+  cursor: grabbing;
 }
 
 .invisible {
@@ -32,7 +61,7 @@
 }
 
 @media (max-width: 550px) {
-  #chess-board-container {
+  #analysis-board-container {
     width: 280px;
     height: 280px;
   }

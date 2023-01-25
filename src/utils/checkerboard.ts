@@ -1,4 +1,4 @@
-import BoardArray from '../BoardArray';
+import { BoardArray } from '../BoardTypes';
 
 /**
  * generateCheckeredBoard is a function that takes two required arguments:

@@ -1,7 +1,6 @@
 import { Component, Prop, h, ComponentDidLoad } from '@stencil/core';
 import { generateCheckeredBoard } from '../../utils/checkerboard';
 
-// Define the 'Checkerboard' component
 @Component({
   tag: 'checker-board',
   styleUrl: 'checker-board.css',

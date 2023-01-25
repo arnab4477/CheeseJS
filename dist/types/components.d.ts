@@ -6,6 +6,10 @@
  */
 import { HTMLStencilElement, JSXBase } from "./stencil-public-runtime";
 export namespace Components {
+    interface AnalysisBoard {
+        "dark"?: string;
+        "light"?: string;
+    }
     interface CheckerBoard {
         "dark"?: string;
         "light"?: string;
@@ -17,6 +21,12 @@ export namespace Components {
     }
 }
 declare global {
+    interface HTMLAnalysisBoardElement extends Components.AnalysisBoard, HTMLStencilElement {
+    }
+    var HTMLAnalysisBoardElement: {
+        prototype: HTMLAnalysisBoardElement;
+        new (): HTMLAnalysisBoardElement;
+    };
     interface HTMLCheckerBoardElement extends Components.CheckerBoard, HTMLStencilElement {
     }
     var HTMLCheckerBoardElement: {
@@ -30,11 +40,16 @@ declare global {
         new (): HTMLChessBoardElement;
     };
     interface HTMLElementTagNameMap {
+        "analysis-board": HTMLAnalysisBoardElement;
         "checker-board": HTMLCheckerBoardElement;
         "chess-board": HTMLChessBoardElement;
     }
 }
 declare namespace LocalJSX {
+    interface AnalysisBoard {
+        "dark"?: string;
+        "light"?: string;
+    }
     interface CheckerBoard {
         "dark"?: string;
         "light"?: string;
@@ -45,6 +60,7 @@ declare namespace LocalJSX {
         "light"?: string;
     }
     interface IntrinsicElements {
+        "analysis-board": AnalysisBoard;
         "checker-board": CheckerBoard;
         "chess-board": ChessBoard;
     }
@@ -53,6 +69,7 @@ export { LocalJSX as JSX };
 declare module "@stencil/core" {
     export namespace JSX {
         interface IntrinsicElements {
+            "analysis-board": LocalJSX.AnalysisBoard & JSXBase.HTMLAttributes<HTMLAnalysisBoardElement>;
             "checker-board": LocalJSX.CheckerBoard & JSXBase.HTMLAttributes<HTMLCheckerBoardElement>;
             "chess-board": LocalJSX.ChessBoard & JSXBase.HTMLAttributes<HTMLChessBoardElement>;
         }
