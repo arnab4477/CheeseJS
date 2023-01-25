@@ -479,6 +479,67 @@ const checkHorizontally = (file, rank, color, direction, boardMap) => {
   return false;
 };
 /**
+ *Function that retrives a piece from the boardMap object with the given
+ file and rank information as unicode value and integers respectively
+ */
+const pieceAt = (fileUnicode, rankNum, boardMap) => {
+  // If the file or the rank is out of bounds of the board, return an empty string
+  if (rankNum > 8 ||
+    rankNum < 1 ||
+    fileUnicode > 'h'.charCodeAt(0) ||
+    fileUnicode < 'a'.charCodeAt(0)) {
+    return '';
+  }
+  return boardMap[String.fromCharCode(fileUnicode)][rankNum.toString()];
+};
+/**
+ * Fynction that checks if an enemy Knight can give a check to the King
+ * from any direction
+ */
+const isCheckFromKnight = (file, rank, color, boardMap) => {
+  const fileUnicode = file.charCodeAt(0);
+  const rankNum = parseInt(rank);
+  // Check if any Knight can check the King from any direction
+  if (color === 'w') {
+    if (pieceAt(fileUnicode + 1, rankNum + 2, boardMap) === 'n')
+      return true;
+    if (pieceAt(fileUnicode - 1, rankNum + 2, boardMap) === 'n')
+      return true;
+    if (pieceAt(fileUnicode + 1, rankNum - 2, boardMap) === 'n')
+      return true;
+    if (pieceAt(fileUnicode - 1, rankNum - 2, boardMap) === 'n')
+      return true;
+    if (pieceAt(fileUnicode + 2, rankNum + 1, boardMap) === 'n')
+      return true;
+    if (pieceAt(fileUnicode - 2, rankNum + 1, boardMap) === 'n')
+      return true;
+    if (pieceAt(fileUnicode + 2, rankNum - 1, boardMap) === 'n')
+      return true;
+    if (pieceAt(fileUnicode - 2, rankNum - 1, boardMap) === 'n')
+      return true;
+    return false;
+  }
+  if (color === 'b') {
+    if (pieceAt(fileUnicode + 1, rankNum + 2, boardMap) === 'N')
+      return true;
+    if (pieceAt(fileUnicode - 1, rankNum + 2, boardMap) === 'N')
+      return true;
+    if (pieceAt(fileUnicode + 1, rankNum - 2, boardMap) === 'N')
+      return true;
+    if (pieceAt(fileUnicode - 1, rankNum - 2, boardMap) === 'N')
+      return true;
+    if (pieceAt(fileUnicode + 2, rankNum + 1, boardMap) === 'N')
+      return true;
+    if (pieceAt(fileUnicode - 2, rankNum + 1, boardMap) === 'N')
+      return true;
+    if (pieceAt(fileUnicode + 2, rankNum - 1, boardMap) === 'N')
+      return true;
+    if (pieceAt(fileUnicode - 2, rankNum - 1, boardMap) === 'N')
+      return true;
+    return false;
+  }
+};
+/**
  * Funtion that checks if the King is in check by an enemy pawn.
  * @param direction must be either "right-up", "left-up", "right-down"
  * or "left-down"
@@ -560,6 +621,9 @@ const isCheck = (square, color, boardMap) => {
   if (checkDiagonally(file, rank, color, 'left-up', boardMap))
     return true;
   if (checkDiagonally(file, rank, color, 'left-down', boardMap))
+    return true;
+  // Check for an enemy Knight
+  if (isCheckFromKnight(file, rank, color, boardMap))
     return true;
   // If none of the checks returned true, that means the King is not in check
   return false;

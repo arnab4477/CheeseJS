@@ -18,6 +18,16 @@ export declare const checkVertically: (file: string, rank: string, color: string
  */
 export declare const checkHorizontally: (file: string, rank: string, color: string, direction: string, boardMap: BoardType) => boolean;
 /**
+ *Function that retrives a piece from the boardMap object with the given
+ file and rank information as unicode value and integers respectively
+ */
+export declare const pieceAt: (fileUnicode: number, rankNum: number, boardMap: BoardType) => string;
+/**
+ * Fynction that checks if an enemy Knight can give a check to the King
+ * from any direction
+ */
+export declare const isCheckFromKnight: (file: string, rank: string, color: string, boardMap: BoardType) => boolean;
+/**
  * Funtion that checks if the King is in check by an enemy pawn.
  * @param direction must be either "right-up", "left-up", "right-down"
  * or "left-down"
