@@ -1,7 +1,7 @@
 {
   "name": "cheese-js",
   "version": "1.0.0",
-  "description": "Cheese.js is an easy to use, lightweight, framework agonistic, modern web component library for creating Chess UI",
+  "description": "CheeseJS is an easy to use, lightweight, web component library for creating Chess UI",
   "author": "Arnab Saha",
   "keywords": [
     "cheesejs",
@@ -9,7 +9,9 @@
     "chess",
     "chess ui",
     "chess library",
-    "cheese"
+    "cheese",
+    "chess github",
+    "chessboard github"
   ],
   "main": "dist/index.cjs.js",
   "module": "dist/index.js",
@@ -21,14 +23,14 @@
   "unpkg": "dist/cheese/cheese.esm.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ionic-team/stencil-component-starter.git"
+    "url": "https://github.com/arnab4477/CheeseJS"
   },
   "files": [
     "dist/",
     "loader/"
   ],
   "scripts": {
-    "build": "stencil build --docs",
+    "build": "stencil build --docs --prod",
     "start": "stencil build --dev --watch --serve",
     "test": "stencil test --spec --e2e",
     "test.watch": "stencil test --spec --e2e --watchAll",

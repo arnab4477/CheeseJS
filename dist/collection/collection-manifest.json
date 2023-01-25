@@ -1,0 +1,14 @@
+{
+  "entries": [
+    "./components/analysis-board/analysis-board.js",
+    "./components/checker-board/checker-board.js",
+    "./components/chess-board/chess-board.js"
+  ],
+  "compiler": {
+    "name": "@stencil/core",
+    "version": "2.20.0",
+    "typescriptVersion": "4.8.4"
+  },
+  "collections": [],
+  "bundles": []
+}
