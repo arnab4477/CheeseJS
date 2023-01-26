@@ -2,8 +2,8 @@ import { h } from '@stencil/core';
 import { generateCheckeredBoard } from '../../utils/checkerboard';
 export class Checkerboard {
   constructor() {
-    this.light = 'white';
-    this.dark = 'black';
+    this.light = '#E0C35A';
+    this.dark = '#7A6A31';
   }
   // This method is called when the component has finished loading
   componentDidLoad() {
@@ -43,7 +43,7 @@ export class Checkerboard {
         },
         "attribute": "light",
         "reflect": false,
-        "defaultValue": "'white'"
+        "defaultValue": "'#E0C35A'"
       },
       "dark": {
         "type": "string",
@@ -61,7 +61,7 @@ export class Checkerboard {
         },
         "attribute": "dark",
         "reflect": false,
-        "defaultValue": "'black'"
+        "defaultValue": "'#7A6A31'"
       }
     };
   }

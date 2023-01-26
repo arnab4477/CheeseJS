@@ -3,7 +3,7 @@
 Object.defineProperty(exports, '__esModule', { value: true });
 
 const index = require('./index-1fbd0a00.js');
-const chessboard = require('./chessboard-97c6d0ab.js');
+const chessboard = require('./chessboard-419476fd.js');
 require('./BoardTypes-d378026b.js');
 
 /**
@@ -1318,15 +1318,131 @@ class Validator {
   }
 }
 
-const analysisBoardCss = "#analysis-board-container{position:relative;width:400px;height:400px;border:1px solid black}.row{display:flex;flex-direction:row;width:100%;height:50px}.promotion-list{display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:10;height:200px;width:50px}.square{width:50px;height:50px;border:0.1px black}.list-squares{width:50px;height:50px;border:0.1px black;background-color:lightgray}.piece{display:flex;justify-content:center;align-items:center;touch-action:none;cursor:grab;cursor:move}.promoting-piece{background-color:gray}.piece:active{cursor:grabbing}.invisible{display:none}@media (max-width: 550px){#analysis-board-container{width:280px;height:280px}.row{height:35px}.square{width:35px;height:35px}}";
+/**
+ * Event listener function for the 'dragstart' event. This adds the 'dragging'
+ * and 'invisible' class to the dragged piece
+ */
+const dragStart = (piece) => {
+  setTimeout(() => {
+    piece.classList.add('dragging', 'invisible');
+  }, 0);
+};
+/**
+ * Event listener function for the 'dragend' event. This removes the 'dragging'
+ * and 'invisible' class to the dragged piece
+ */
+const dragEnd = (piece) => {
+  piece.classList.remove('dragging', 'invisible');
+};
+/**
+ * Event listener function for the 'drop' event. This checks if the move is valid
+ * with the provided validator class and drops the piece on the square if it is
+ * valid.This also takes care of special moves like 'en passant', 'castling' and
+ * 'Pawn promotion'
+ */
+const dropPiece = (square, boardHtml, validator) => {
+  // Get the HTML element being dragged
+  const pieceBeingDragged = boardHtml.querySelector('.dragging');
+  // Get the info for the piece, its origin and destination square
+  const originSquare = pieceBeingDragged.parentElement.id;
+  const destSquare = square.id;
+  const piece = pieceBeingDragged.id;
+  // Validate the move
+  const { isValid, isEnPassant, isCastle, isPromotion } = validator.ValidateMove(originSquare, destSquare, piece);
+  if (isValid) {
+    // Get the square where the opposite Pawn moved 2 squares tp (which can get en passanted)
+    // and remove that Pawn
+    if (isEnPassant) {
+      const enPassantSquare = getEnPassantSquare(destSquare, piece, boardHtml);
+      enPassantSquare.innerHTML = '';
+      square.appendChild(pieceBeingDragged);
+      pieceBeingDragged.classList.remove('dragging');
+      return;
+    }
+    // If the move is a castling move, change the King and the Rook's
+    // positions accordingly
+    if (isCastle && (piece === 'K' || piece === 'k')) {
+      const [KingsOrigin, KingsDest, RooksOrigin, RooksDest] = getCastlingSquares(piece, destSquare, boardHtml);
+      KingsOrigin.innerHTML = '';
+      KingsDest.appendChild(pieceBeingDragged);
+      const Rook = RooksOrigin.firstElementChild;
+      RooksOrigin.innerHTML = '';
+      RooksDest.appendChild(Rook);
+      pieceBeingDragged.classList.remove('dragging');
+      return;
+    }
+    if (isPromotion) {
+      // Toggle the IsPromoting state to true
+      validator.IsPromoting = true;
+      // Delete the pawn from the square it was on before the promotion
+      pieceBeingDragged.remove();
+      const promotionRank = destSquare[1];
+      const promotionRankElement = square.parentElement;
+      // For the black Pawn's promotion, the list will be displayed
+      // starting from 3 squares above so that list ends on the promotion
+      // square. Get the temprary elements and its info if only the
+      // promoting pawn is a black Pawn
+      let temporaryReplaceSquareRank = '';
+      let temporaryReplaceSquare;
+      let temporaryReplaceRankElement;
+      if (piece === 'p') {
+        temporaryReplaceSquareRank = (parseInt(destSquare[1]) + 3).toString();
+        temporaryReplaceSquare = boardHtml.querySelector(`#${destSquare[0] + temporaryReplaceSquareRank}`);
+        temporaryReplaceRankElement = temporaryReplaceSquare.parentElement;
+      }
+      // Get the list of the pieces that cane be promoted to and replace it with
+      // with the appropriate square
+      const list = createPawnPromotionHtmlElement(promotionRank);
+      piece === 'P'
+        ? promotionRankElement.replaceChild(list, square)
+        : temporaryReplaceRankElement.replaceChild(list, temporaryReplaceSquare);
+      // This event listner runs when a piece from the list is clicked
+      list.addEventListener('click', (e) => {
+        // Get the selected piece, remove its promoting class and
+        // add the same attributes as a normal piece
+        const pieceToPromoteTo = e.target;
+        pieceToPromoteTo.classList.remove('promoting-piece');
+        pieceToPromoteTo.setAttribute('draggable', 'true');
+        // Set the same dragging event listeners to the promoted piece as a normal piece
+        pieceToPromoteTo.addEventListener('dragstart', () => {
+          dragStart(pieceToPromoteTo);
+        });
+        pieceToPromoteTo.addEventListener('dragend', () => {
+          dragEnd(pieceToPromoteTo);
+        });
+        // Add the promoted piece to its promoted square and replace the
+        // list element with original square element according to color
+        square.innerHTML = '';
+        square.appendChild(pieceToPromoteTo);
+        piece === 'P'
+          ? promotionRankElement.replaceChild(square, list)
+          : temporaryReplaceRankElement.replaceChild(temporaryReplaceSquare, list);
+        // Update the boardMap with the new promoted piece
+        validator.PromotePawn(pieceToPromoteTo.id);
+        // Toggle the IsPromoting state to false
+        validator.IsPromoting = false;
+      });
+      return;
+    }
+    square.innerHTML = '';
+    square.appendChild(pieceBeingDragged);
+    pieceBeingDragged.classList.remove('dragging');
+    return;
+  }
+  if (!(pieceBeingDragged.parentElement.id === square.id)) {
+    pieceBeingDragged.classList.remove('dragging');
+  }
+};
+
+const analysisBoardCss = "#analysis-board-container{position:relative;width:400px;height:400px;border:1px solid black}.row{display:flex;flex-direction:row;width:100%;height:50px}.promotion-list{display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:10;height:200px;width:50px}.square{width:50px;height:50px;border:0.1px black}.list-squares{width:50px;height:50px;border:0.1px black;background-color:lightgray}.piece{display:flex;justify-content:center;align-items:center;touch-action:none;cursor:grab;cursor:move}.promoting-piece{background-color:gray}.piece:active{cursor:grabbing}.dragging{transform:scale(1.2);transition:0.2s ease-in-out}.invisible{display:none}@media (max-width: 550px){#analysis-board-container{width:360px;height:360px}.row{height:45px}.square{width:45px;height:45px}.piece{height:40px}}";
 
 const AnalysisBoard = class {
   constructor(hostRef) {
     index.registerInstance(this, hostRef);
     // An instance of the Validator class for move validation
     this.validator = new Validator();
-    this.light = 'white';
-    this.dark = 'black';
+    this.light = '#E0C35A';
+    this.dark = '#7A6A31';
   }
   // This method is called when the component has finished loading
   componentDidLoad() {
@@ -1337,15 +1453,24 @@ const AnalysisBoard = class {
     const squares = this.analysisBoardContainer.querySelectorAll('.square');
     // Add drag and drop event listeners to each piece
     pieces.forEach((piece) => {
-      // When a piece is dragged, add the 'dragging' and 'invisible' classes to it
       piece.addEventListener('dragstart', () => {
-        setTimeout(() => {
-          piece.classList.add('dragging', 'invisible');
-        }, 0);
+        dragStart(piece);
       });
-      // When a piece is dropped, remove the 'dragging' and 'invisible' classes from it
       piece.addEventListener('dragend', () => {
-        piece.classList.remove('dragging', 'invisible');
+        dragEnd(piece);
+      });
+      piece.addEventListener('click', () => {
+        if (piece.classList.contains('dragging')) {
+          piece.classList.remove('dragging');
+          return;
+        }
+        const otherHighlightedPiece = this.analysisBoardContainer.querySelector('.dragging');
+        if (otherHighlightedPiece !== null) {
+          const parentSquare = otherHighlightedPiece.parentElement;
+          dropPiece(parentSquare, this.analysisBoardContainer, this.validator);
+          return;
+        }
+        piece.classList.add('dragging');
       });
     });
     // Add drag and drop event listeners to each square
@@ -1354,97 +1479,15 @@ const AnalysisBoard = class {
       square.addEventListener('dragover', (e) => {
         e.preventDefault();
       });
-      // When a piece is dropped on a square, append the piece to the square and clear the square's inner HTML
       square.addEventListener('drop', (e) => {
         e.preventDefault();
-        // Get the HTML element being dragged
-        const pieceBeingDragged = this.analysisBoardContainer.querySelector('.dragging');
-        // Get the info for the piece, its origin and destination square
-        const originSquare = pieceBeingDragged.parentElement.id;
-        const destSquare = square.id;
-        const piece = pieceBeingDragged.id;
-        // Validate the move
-        const { isValid, isEnPassant, isCastle, isPromotion } = this.validator.ValidateMove(originSquare, destSquare, piece);
-        if (isValid) {
-          // Get the square where the opposite Pawn moved 2 squares tp (which can get en passanted)
-          // and remove that Pawn
-          if (isEnPassant) {
-            const enPassantSquare = getEnPassantSquare(destSquare, piece, this.analysisBoardContainer);
-            enPassantSquare.innerHTML = '';
-            square.appendChild(pieceBeingDragged);
-            return;
-          }
-          // If the move is a castling move, change the King and the Rook's
-          // positions accordingly
-          if (isCastle && (piece === 'K' || piece === 'k')) {
-            const [KingsOrigin, KingsDest, RooksOrigin, RooksDest] = getCastlingSquares(piece, destSquare, this.analysisBoardContainer);
-            KingsOrigin.innerHTML = '';
-            KingsDest.appendChild(pieceBeingDragged);
-            const Rook = RooksOrigin.firstElementChild;
-            RooksOrigin.innerHTML = '';
-            RooksDest.appendChild(Rook);
-            return;
-          }
-          if (isPromotion) {
-            // Toggle the IsPromoting state to true
-            this.validator.IsPromoting = true;
-            // Delete the pawn from the square it was on before the promotion
-            pieceBeingDragged.remove();
-            const promotionRank = destSquare[1];
-            const promotionRankElement = square.parentElement;
-            // For the black Pawn's promotion, the list will be displayed
-            // starting from 3 squares above so that list ends on the promotion
-            // square. Get the temprary elements and its info if only the
-            // promoting pawn is a black Pawn
-            let temporaryReplaceSquareRank = '';
-            let temporaryReplaceSquare;
-            let temporaryReplaceRankElement;
-            if (piece === 'p') {
-              temporaryReplaceSquareRank = (parseInt(destSquare[1]) + 3).toString();
-              temporaryReplaceSquare =
-                this.analysisBoardContainer.querySelector(`#${destSquare[0] + temporaryReplaceSquareRank}`);
-              temporaryReplaceRankElement =
-                temporaryReplaceSquare.parentElement;
-            }
-            // Get the list of the pieces that cane be promoted to and replace it with
-            // with the appropriate square
-            const list = createPawnPromotionHtmlElement(promotionRank);
-            piece === 'P'
-              ? promotionRankElement.replaceChild(list, square)
-              : temporaryReplaceRankElement.replaceChild(list, temporaryReplaceSquare);
-            // This event listner runs when a piece from the list is clicked
-            list.addEventListener('click', (e) => {
-              // Get the selected piece, remove its promoting class and
-              // add the same attributes as a normal piece
-              const pieceToPromoteTo = e.target;
-              pieceToPromoteTo.classList.remove('promoting-piece');
-              pieceToPromoteTo.setAttribute('draggable', 'true');
-              // Set the same dragging event listeners to the promoted piece as a normal piece
-              pieceToPromoteTo.addEventListener('dragstart', () => {
-                setTimeout(() => {
-                  pieceToPromoteTo.classList.add('dragging', 'invisible');
-                }, 0);
-              });
-              pieceToPromoteTo.addEventListener('dragend', () => {
-                pieceToPromoteTo.classList.remove('dragging', 'invisible');
-              });
-              // Add the promoted piece to its promoted square and replace the
-              // list element with original square element according to color
-              square.innerHTML = '';
-              square.appendChild(pieceToPromoteTo);
-              piece === 'P'
-                ? promotionRankElement.replaceChild(square, list)
-                : temporaryReplaceRankElement.replaceChild(temporaryReplaceSquare, list);
-              // Update the boardMap with the new promoted piece
-              this.validator.PromotePawn(pieceToPromoteTo.id);
-              // Toggle the IsPromoting state to false
-              this.validator.IsPromoting = false;
-            });
-            return;
-          }
-          square.innerHTML = '';
-          square.appendChild(pieceBeingDragged);
-        }
+        dropPiece(square, this.analysisBoardContainer, this.validator);
+      });
+      square.addEventListener('click', () => {
+        const movingPiece = this.analysisBoardContainer.querySelector('.dragging');
+        if (movingPiece === null)
+          return;
+        dropPiece(square, this.analysisBoardContainer, this.validator);
       });
     });
   }

@@ -31,13 +31,13 @@ const generateCheckeredBoard = (lightSquareColor, darkSquareColor) => {
   return html;
 };
 
-const checkerBoardCss = "#checker-board-container{position:relative;width:400px;height:400px}.row{display:flex;flex-direction:row;width:100%;height:50px}.square{width:50px;height:50px}@media (max-width: 550px){#checker-board-container{width:280px;height:280px}.row{height:35px}.square{width:35px;height:35px}}";
+const checkerBoardCss = "#checker-board-container{position:relative;width:400px;height:400px}.row{display:flex;flex-direction:row;width:100%;height:50px}.square{width:50px;height:50px}@media (max-width: 550px){#checker-board-container{width:360px;height:360px}.row{height:45px}.square{width:45px;height:45px}}";
 
 const Checkerboard = class {
   constructor(hostRef) {
     registerInstance(this, hostRef);
-    this.light = 'white';
-    this.dark = 'black';
+    this.light = '#E0C35A';
+    this.dark = '#7A6A31';
   }
   // This method is called when the component has finished loading
   componentDidLoad() {
