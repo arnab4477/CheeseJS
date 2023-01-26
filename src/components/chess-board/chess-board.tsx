@@ -8,8 +8,8 @@ import { generateChessBoard } from '../../utils/chessboard';
 })
 export class ChessBoard implements ComponentDidLoad {
   // Component properties for the square colors and the FEN string
-  @Prop({ mutable: true }) light?: string = 'white';
-  @Prop({ mutable: true }) dark?: string = 'black';
+  @Prop({ mutable: true }) light?: string = '#E0C35A';
+  @Prop({ mutable: true }) dark?: string = '#7A6A31';
   @Prop({ mutable: true }) fen?: string =
     'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR';
 

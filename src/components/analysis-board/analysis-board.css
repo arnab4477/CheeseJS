@@ -52,6 +52,10 @@
   background-color: gray;
 }
 
+.dragging {
+  background: red;
+}
+
 .piece:active {
   cursor: grabbing;
 }
