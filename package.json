@@ -1,7 +1,7 @@
 {
-  "name": "cheese-js",
+  "name": "@arnab4477/cheesejs",
   "version": "1.0.0",
-  "description": "CheeseJS is a simple and lightweight Web Component library for creating customizable Chess UI",
+  "description": "CheeseJS is a simple Web Component library for creating customizable Chess UI",
   "author": "Arnab Saha",
   "keywords": [
     "cheesejs",
