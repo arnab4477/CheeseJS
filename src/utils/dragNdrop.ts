@@ -54,6 +54,8 @@ export const dropPiece = (
 
       enPassantSquare.innerHTML = '';
       square.appendChild(pieceBeingDragged);
+      pieceBeingDragged.classList.remove('dragging');
+
       return;
     }
 
@@ -69,6 +71,8 @@ export const dropPiece = (
       const Rook = RooksOrigin.firstElementChild;
       RooksOrigin.innerHTML = '';
       RooksDest.appendChild(Rook);
+      pieceBeingDragged.classList.remove('dragging');
+
       return;
     }
 
@@ -147,5 +151,11 @@ export const dropPiece = (
 
     square.innerHTML = '';
     square.appendChild(pieceBeingDragged);
+    pieceBeingDragged.classList.remove('dragging');
+    return;
+  }
+
+  if (!(pieceBeingDragged.parentElement.id === square.id)) {
+    pieceBeingDragged.classList.remove('dragging');
   }
 };

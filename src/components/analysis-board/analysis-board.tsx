@@ -41,6 +41,25 @@ export class AnalysisBoard implements ComponentDidLoad {
       piece.addEventListener('dragend', () => {
         DnD.dragEnd(piece);
       });
+
+      piece.addEventListener('click', () => {
+        if (piece.classList.contains('dragging')) {
+          piece.classList.remove('dragging');
+          return;
+        }
+        const otherHighlightedPiece =
+          this.analysisBoardContainer.querySelector('.dragging');
+        if (otherHighlightedPiece !== null) {
+          const parentSquare = otherHighlightedPiece.parentElement;
+          DnD.dropPiece(
+            parentSquare,
+            this.analysisBoardContainer,
+            this.validator
+          );
+          return;
+        }
+        piece.classList.add('dragging');
+      });
     });
 
     // Add drag and drop event listeners to each square
@@ -52,6 +71,14 @@ export class AnalysisBoard implements ComponentDidLoad {
 
       square.addEventListener('drop', (e) => {
         e.preventDefault();
+        DnD.dropPiece(square, this.analysisBoardContainer, this.validator);
+      });
+
+      square.addEventListener('click', () => {
+        const movingPiece =
+          this.analysisBoardContainer.querySelector('.dragging');
+        if (movingPiece === null) return;
+
         DnD.dropPiece(square, this.analysisBoardContainer, this.validator);
       });
     });
