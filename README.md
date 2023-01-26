@@ -1,2 +1,3 @@
-# Cheese.js
-Cheese.js is an easy to use, framework agonistic, blazingly fast, modern web component library for creating Chess UI.
+# CheeseJS
+
+CheeseJS is a simple and lightweight Web Component library for creating customizable Chess UI
