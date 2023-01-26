@@ -1,7 +1,7 @@
 import { BoardArray } from '../BoardTypes';
 import { getPieceImage } from '../pieces/pieceUtils';
 
-// to learn about FEN stings, visit: https://www.chess.com/terms/fen-chess
+// To learn about FEN stings, visit: https://www.chess.com/terms/fen-chess
 
 /**
  * generateChessBoard is a function that takes three optional arguments:

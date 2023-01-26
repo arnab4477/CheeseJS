@@ -2,8 +2,8 @@ import { h } from '@stencil/core';
 import { generateChessBoard } from '../../utils/chessboard';
 export class ChessBoard {
   constructor() {
-    this.light = 'white';
-    this.dark = 'black';
+    this.light = '#E0C35A';
+    this.dark = '#7A6A31';
     this.fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR';
   }
   // This method is called when the component has finished loading
@@ -25,6 +25,21 @@ export class ChessBoard {
       piece.addEventListener('dragend', () => {
         piece.classList.remove('dragging', 'invisible');
       });
+      piece.addEventListener('click', () => {
+        if (piece.classList.contains('dragging')) {
+          piece.classList.remove('dragging');
+          return;
+        }
+        const otherHighlightedPiece = this.chessBoardContainer.querySelector('.dragging');
+        if (otherHighlightedPiece !== null) {
+          const parentSquare = otherHighlightedPiece.parentElement;
+          parentSquare.innerHTML = '';
+          parentSquare.appendChild(otherHighlightedPiece);
+          otherHighlightedPiece.classList.remove('dragging');
+          return;
+        }
+        piece.classList.add('dragging');
+      });
     });
     // Add drag and drop event listeners to each square
     squares.forEach((square) => {
@@ -38,6 +53,15 @@ export class ChessBoard {
         const pieceBeingDragged = this.chessBoardContainer.querySelector('.dragging');
         square.innerHTML = '';
         square.appendChild(pieceBeingDragged);
+      });
+      square.addEventListener('click', (e) => {
+        e.preventDefault();
+        const pieceBeingDragged = this.chessBoardContainer.querySelector('.dragging');
+        if (pieceBeingDragged === null)
+          return;
+        square.innerHTML = '';
+        square.appendChild(pieceBeingDragged);
+        pieceBeingDragged.classList.remove('dragging');
       });
     });
   }
@@ -74,7 +98,7 @@ export class ChessBoard {
         },
         "attribute": "light",
         "reflect": false,
-        "defaultValue": "'white'"
+        "defaultValue": "'#E0C35A'"
       },
       "dark": {
         "type": "string",
@@ -92,7 +116,7 @@ export class ChessBoard {
         },
         "attribute": "dark",
         "reflect": false,
-        "defaultValue": "'black'"
+        "defaultValue": "'#7A6A31'"
       },
       "fen": {
         "type": "string",

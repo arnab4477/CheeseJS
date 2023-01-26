@@ -8,8 +8,8 @@ import { generateChessBoard } from '../../utils/chessboard';
 })
 export class ChessBoard implements ComponentDidLoad {
   // Component properties for the square colors and the FEN string
-  @Prop({ mutable: true }) light?: string = 'white';
-  @Prop({ mutable: true }) dark?: string = 'black';
+  @Prop({ mutable: true }) light?: string = '#E0C35A';
+  @Prop({ mutable: true }) dark?: string = '#7A6A31';
   @Prop({ mutable: true }) fen?: string =
     'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR';
 
@@ -42,6 +42,23 @@ export class ChessBoard implements ComponentDidLoad {
       piece.addEventListener('dragend', () => {
         piece.classList.remove('dragging', 'invisible');
       });
+
+      piece.addEventListener('click', () => {
+        if (piece.classList.contains('dragging')) {
+          piece.classList.remove('dragging');
+          return;
+        }
+        const otherHighlightedPiece =
+          this.chessBoardContainer.querySelector('.dragging');
+        if (otherHighlightedPiece !== null) {
+          const parentSquare = otherHighlightedPiece.parentElement;
+          parentSquare.innerHTML = '';
+          parentSquare.appendChild(otherHighlightedPiece);
+          otherHighlightedPiece.classList.remove('dragging');
+          return;
+        }
+        piece.classList.add('dragging');
+      });
     });
 
     // Add drag and drop event listeners to each square
@@ -55,8 +72,20 @@ export class ChessBoard implements ComponentDidLoad {
         e.preventDefault();
         const pieceBeingDragged =
           this.chessBoardContainer.querySelector('.dragging');
+
         square.innerHTML = '';
         square.appendChild(pieceBeingDragged);
+      });
+
+      square.addEventListener('click', (e) => {
+        e.preventDefault();
+        const pieceBeingDragged =
+          this.chessBoardContainer.querySelector('.dragging');
+        if (pieceBeingDragged === null) return;
+
+        square.innerHTML = '';
+        square.appendChild(pieceBeingDragged);
+        pieceBeingDragged.classList.remove('dragging');
       });
     });
   }

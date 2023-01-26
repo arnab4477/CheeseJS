@@ -8,8 +8,8 @@ import { generateCheckeredBoard } from '../../utils/checkerboard';
 })
 export class Checkerboard implements ComponentDidLoad {
   // Component properties for the square colors
-  @Prop({ mutable: true }) light?: string = 'white';
-  @Prop({ mutable: true }) dark?: string = 'black';
+  @Prop({ mutable: true }) light?: string = '#E0C35A';
+  @Prop({ mutable: true }) dark?: string = '#7A6A31';
 
   // A reference to the checkerboard container element
   checkerboardContainer: HTMLElement;

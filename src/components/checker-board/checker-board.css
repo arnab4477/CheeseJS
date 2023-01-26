@@ -18,16 +18,16 @@
 
 @media (max-width: 550px) {
   #checker-board-container {
-    width: 280px;
-    height: 280px;
+    width: 360px;
+    height: 360px;
   }
 
   .row {
-    height: 35px;
+    height: 45px;
   }
 
   .square {
-    width: 35px;
-    height: 35px;
+    width: 45px;
+    height: 45px;
   }
 }

@@ -56,22 +56,31 @@
   cursor: grabbing;
 }
 
+.dragging {
+  transform: scale(1.2);
+  transition: 0.2s ease-in-out;
+}
+
 .invisible {
   display: none;
 }
 
 @media (max-width: 550px) {
   #analysis-board-container {
-    width: 280px;
-    height: 280px;
+    width: 360px;
+    height: 360px;
   }
 
   .row {
-    height: 35px;
+    height: 45px;
   }
 
   .square {
-    width: 35px;
-    height: 35px;
+    width: 45px;
+    height: 45px;
+  }
+
+  .piece {
+    height: 40px;
   }
 }
