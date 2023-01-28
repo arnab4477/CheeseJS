@@ -1,3 +1,25 @@
+'use strict';
+
+function _interopNamespace(e) {
+  if (e && e.__esModule) return e;
+  var n = Object.create(null);
+  if (e) {
+    Object.keys(e).forEach(function (k) {
+      if (k !== 'default') {
+        var d = Object.getOwnPropertyDescriptor(e, k);
+        Object.defineProperty(n, k, d.get ? d : {
+          enumerable: true,
+          get: function () {
+            return e[k];
+          }
+        });
+      }
+    });
+  }
+  n['default'] = e;
+  return Object.freeze(n);
+}
+
 const NAMESPACE = 'cheese';
 
 /**
@@ -42,6 +64,18 @@ const isComplexType = (o) => {
     return o === 'object' || o === 'function';
 };
 /**
+ * Helper method for querying a `meta` tag that contains a nonce value
+ * out of a DOM's head.
+ *
+ * @param doc The DOM containing the `head` to query against
+ * @returns The content of the meta tag representing the nonce value, or `undefined` if no tag
+ * exists or the tag has no content.
+ */
+function queryNonceMetaTagContent(doc) {
+    var _a, _b, _c;
+    return (_c = (_b = (_a = doc.head) === null || _a === void 0 ? void 0 : _a.querySelector('meta[name="csp-nonce"]')) === null || _b === void 0 ? void 0 : _b.getAttribute('content')) !== null && _c !== void 0 ? _c : undefined;
+}
+/**
  * Production h() function based on Preact by
  * Jason Miller (@developit)
  * Licensed under the MIT License
@@ -49,7 +83,6 @@ const isComplexType = (o) => {
  *
  * Modified for Stencil's compiler and vdom
  */
-// const stack: any[] = [];
 // export function h(nodeName: string | d.FunctionalComponent, vnodeData: d.PropsType, child?: d.ChildType): d.VNode;
 // export function h(nodeName: string | d.FunctionalComponent, vnodeData: d.PropsType, ...children: d.ChildType[]): d.VNode;
 const h = (nodeName, vnodeData, ...children) => {
@@ -87,6 +120,14 @@ const h = (nodeName, vnodeData, ...children) => {
     }
     return vnode;
 };
+/**
+ * A utility function for creating a virtual DOM node from a tag and some
+ * possible text content.
+ *
+ * @param tag the tag for this element
+ * @param text possible text content for the node
+ * @returns a newly-minted virtual DOM node
+ */
 const newVNode = (tag, text) => {
     const vnode = {
         $flags$: 0,
@@ -101,6 +142,12 @@ const newVNode = (tag, text) => {
     return vnode;
 };
 const Host = {};
+/**
+ * Check whether a given node is a Host node or not
+ *
+ * @param node the virtual DOM node to check
+ * @returns whether it's a Host node or not
+ */
 const isHost = (node) => node && node.$tag$ === Host;
 /**
  * Parse a new property value for a given property type.
@@ -170,6 +217,7 @@ const registerStyle = (scopeId, cssText, allowCS) => {
     styles.set(scopeId, style);
 };
 const addStyle = (styleContainerNode, cmpMeta, mode, hostElm) => {
+    var _a;
     let scopeId = getScopeId(cmpMeta);
     const style = styles.get(scopeId);
     // if an element is NOT connected then getRootNode() will return the wrong root node
@@ -188,6 +236,11 @@ const addStyle = (styleContainerNode, cmpMeta, mode, hostElm) => {
                     {
                         styleElm = doc.createElement('style');
                         styleElm.innerHTML = style;
+                    }
+                    // Apply CSP nonce to the style tag if it exists
+                    const nonce = (_a = plt.$nonce$) !== null && _a !== void 0 ? _a : queryNonceMetaTagContent(doc);
+                    if (nonce != null) {
+                        styleElm.setAttribute('nonce', nonce);
                     }
                     styleContainerNode.insertBefore(styleElm, styleContainerNode.querySelector('link'));
                 }
@@ -341,6 +394,21 @@ const createElm = (oldParentVNode, newParentVNode, childIndex, parentElm) => {
     }
     return elm;
 };
+/**
+ * Create DOM nodes corresponding to a list of {@link d.Vnode} objects and
+ * add them to the DOM in the appropriate place.
+ *
+ * @param parentElm the DOM node which should be used as a parent for the new
+ * DOM nodes
+ * @param before a child of the `parentElm` which the new children should be
+ * inserted before (optional)
+ * @param parentVNode the parent virtual DOM node
+ * @param vnodes the new child virtual DOM nodes to produce DOM nodes for
+ * @param startIdx the index in the child virtual DOM nodes at which to start
+ * creating DOM nodes (inclusive)
+ * @param endIdx the index in the child virtual DOM nodes at which to stop
+ * creating DOM nodes (inclusive)
+ */
 const addVnodes = (parentElm, before, parentVNode, vnodes, startIdx, endIdx) => {
     let containerElm = (parentElm);
     let childNode;
@@ -357,6 +425,19 @@ const addVnodes = (parentElm, before, parentVNode, vnodes, startIdx, endIdx) => 
         }
     }
 };
+/**
+ * Remove the DOM elements corresponding to a list of {@link d.VNode} objects.
+ * This can be used to, for instance, clean up after a list of children which
+ * should no longer be shown.
+ *
+ * This function also handles some of Stencil's slot relocation logic.
+ *
+ * @param vnodes a list of virtual DOM nodes to remove
+ * @param startIdx the index at which to start removing nodes (inclusive)
+ * @param endIdx the index at which to stop removing nodes (inclusive)
+ * @param vnode a VNode
+ * @param elm an element
+ */
 const removeVnodes = (vnodes, startIdx, endIdx, vnode, elm) => {
     for (; startIdx <= endIdx; ++startIdx) {
         if ((vnode = vnodes[startIdx])) {
@@ -549,7 +630,8 @@ const updateChildren = (parentElm, oldCh, newVNode, newCh) => {
  *
  * So, in other words, if `key` attrs are not set on VNodes which may be
  * changing order within a `children` array or something along those lines then
- * we could obtain a false positive and then have to do needless re-rendering.
+ * we could obtain a false negative and then have to do needless re-rendering
+ * (i.e. we'd say two VNodes aren't equal when in fact they should be).
  *
  * @param leftVNode the first VNode to check
  * @param rightVNode the second VNode to check
@@ -605,6 +687,18 @@ const callNodeRefs = (vNode) => {
         vNode.$children$ && vNode.$children$.map(callNodeRefs);
     }
 };
+/**
+ * The main entry point for Stencil's virtual DOM-based rendering engine
+ *
+ * Given a {@link d.HostRef} container and some virtual DOM nodes, this
+ * function will handle creating a virtual DOM tree with a single root, patching
+ * the current virtual DOM tree onto an old one (if any), dealing with slot
+ * relocation, and reflecting attributes.
+ *
+ * @param hostRef data needed to root and render the virtual DOM tree, such as
+ * the DOM node into which it should be rendered.
+ * @param renderFnResults the virtual DOM nodes to be rendered
+ */
 const renderVdom = (hostRef, renderFnResults) => {
     const hostElm = hostRef.$hostElement$;
     const oldVNode = hostRef.$vnode$ || newVNode(null, null);
@@ -1014,6 +1108,7 @@ const disconnectedCallback = (elm) => {
     }
 };
 const bootstrapLazy = (lazyBundles, options = {}) => {
+    var _a;
     const endBootstrap = createTime();
     const cmpTags = [];
     const exclude = options.exclude || [];
@@ -1087,6 +1182,11 @@ const bootstrapLazy = (lazyBundles, options = {}) => {
     {
         visibilityStyle.innerHTML = cmpTags + HYDRATED_CSS;
         visibilityStyle.setAttribute('data-styles', '');
+        // Apply CSP nonce to the style tag if it exists
+        const nonce = (_a = plt.$nonce$) !== null && _a !== void 0 ? _a : queryNonceMetaTagContent(doc);
+        if (nonce != null) {
+            visibilityStyle.setAttribute('nonce', nonce);
+        }
         head.insertBefore(visibilityStyle, metaCharset ? metaCharset.nextSibling : head.firstChild);
     }
     // Process deferred connectedCallbacks now all components have been registered
@@ -1102,6 +1202,13 @@ const bootstrapLazy = (lazyBundles, options = {}) => {
     // Fallback appLoad event
     endBootstrap();
 };
+/**
+ * Assigns the given value to the nonce property on the runtime platform object.
+ * During runtime, this value is used to set the nonce attribute on all dynamically created script and style tags.
+ * @param nonce The value to be assigned to the platform nonce property.
+ * @returns void
+ */
+const setNonce = (nonce) => (plt.$nonce$ = nonce);
 const hostRefs = /*@__PURE__*/ new WeakMap();
 const getHostRef = (ref) => hostRefs.get(ref);
 const registerInstance = (lazyInstance, hostRef) => hostRefs.set((hostRef.$lazyInstance$ = lazyInstance), hostRef);
@@ -1131,12 +1238,12 @@ const loadModule = (cmpMeta, hostRef, hmrVersionId) => {
         return module[exportName];
     }
     /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
-    return import(
+    return Promise.resolve().then(function () { return /*#__PURE__*/_interopNamespace(require(
     /* @vite-ignore */
     /* webpackInclude: /\.entry\.js$/ */
     /* webpackExclude: /\.system\.entry\.js$/ */
     /* webpackMode: "lazy" */
-    `./${bundleId}.entry.js${''}`).then((importedModule) => {
+    `./${bundleId}.entry.js${''}`)); }).then((importedModule) => {
         {
             cmpModules.set(bundleId, importedModule);
         }
@@ -1208,4 +1315,8 @@ const flush = () => {
 const nextTick = /*@__PURE__*/ (cb) => promiseResolve().then(cb);
 const writeTask = /*@__PURE__*/ queueTask(queueDomWrites, true);
 
-export { bootstrapLazy as b, h, promiseResolve as p, registerInstance as r };
+exports.bootstrapLazy = bootstrapLazy;
+exports.h = h;
+exports.promiseResolve = promiseResolve;
+exports.registerInstance = registerInstance;
+exports.setNonce = setNonce;

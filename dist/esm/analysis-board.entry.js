@@ -1,5 +1,5 @@
-import { r as registerInstance, h } from './index-e0c21bd2.js';
-import { f as fenToBoardMap, g as generateChessBoard } from './chessboard-56c4a00e.js';
+import { r as registerInstance, h } from './index-bf3a8cd4.js';
+import { p as pieceImages, f as fenToBoardMap, g as generateChessBoard } from './chessboard-456a9829.js';
 import './BoardTypes-d86232b4.js';
 
 /**
@@ -805,16 +805,16 @@ const isPromotion = (color, destRank) => {
 const createPawnPromotionHtmlElement = (rank) => {
   // Create HTML string for both the colors
   const whitePromotionHtml = `<div class='promotion-list'>
-       <img id="Q" alt='white queen' class="piece promoting-piece" src=${'../assets/WQ.svg.png'}>
-       <img id="R" alt='white rook' class="piece promoting-piece" src=${'../assets/WR.svg.png'}>
-       <img id="B" alt='white bishop' class="piece promoting-piece" src=${'../assets/WB.svg.png'}>
-       <img id="N" alt='white knight' class="piece promoting-piece" src=${'../assets/WN.svg.png'}>
+       <img id="Q" alt='white queen' class="piece promoting-piece" src=${pieceImages.Q}>
+       <img id="R" alt='white rook' class="piece promoting-piece" src=${pieceImages.R}>
+       <img id="B" alt='white bishop' class="piece promoting-piece" src=${pieceImages.B}>
+       <img id="N" alt='white knight' class="piece promoting-piece" src=${pieceImages.N}>
      </div>`;
   const blackPromotionHtml = `<div class='promotion-list'>
-      <img id="n" alt='black knight' class="piece promoting-piece" src=${'../assets/bn.svg.png'}>
-      <img id="b" alt='black bishop' class="piece promoting-piece" src=${'../assets/bb.svg.png'}>
-      <img id="r" alt='black rook' class="piece promoting-piece" src=${'../assets/br.svg.png'}>
-      <img id="q" alt='black queen' class="piece promoting-piece" src=${'../assets/bq.svg.png'}>
+      <img id="n" alt='black knight' class="piece promoting-piece" src=${pieceImages.n}>
+      <img id="b" alt='black bishop' class="piece promoting-piece" src=${pieceImages.b}>
+      <img id="r" alt='black rook' class="piece promoting-piece" src=${pieceImages.r}>
+      <img id="q" alt='black queen' class="piece promoting-piece" src=${pieceImages.q}>
      </div>`;
   // Add the HTML strings above to a Wrapper element
   // and extract it to return it as an individual element
@@ -1429,8 +1429,28 @@ const dropPiece = (square, boardHtml, validator) => {
     pieceBeingDragged.classList.remove('dragging');
   }
 };
+/**
+ * Event handler to run when a piece is clicked
+ */
+const onPieceClick = (piece, documentHtml, validator) => {
+  // If the piece is already highlighted, unhighlight it  
+  if (piece.classList.contains('dragging')) {
+    piece.classList.remove('dragging');
+    return;
+  }
+  // See if any other piece is highlighted as well, if there is
+  // then try to move to that square (will be invalid for same color piece)
+  const otherHighlightedPiece = documentHtml.querySelector('.dragging');
+  if (otherHighlightedPiece !== null) {
+    const parentSquare = otherHighlightedPiece.parentElement;
+    dropPiece(parentSquare, documentHtml, validator);
+    return;
+  }
+  // Highlight the piece
+  piece.classList.add('dragging');
+};
 
-const analysisBoardCss = "#analysis-board-container{position:relative;width:400px;height:400px;border:1px solid black}.row{display:flex;flex-direction:row;width:100%;height:50px}.promotion-list{display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:10;height:200px;width:50px}.square{width:50px;height:50px;border:0.1px black}.list-squares{width:50px;height:50px;border:0.1px black;background-color:lightgray}.piece{display:flex;justify-content:center;align-items:center;touch-action:none;cursor:grab;cursor:move}.promoting-piece{background-color:gray}.piece:active{cursor:grabbing}.dragging{transform:scale(1.2);transition:0.2s ease-in-out}.invisible{display:none}@media (max-width: 550px){#analysis-board-container{width:360px;height:360px}.row{height:45px}.square{width:45px;height:45px}.piece{height:40px}}";
+const analysisBoardCss = "#analysis-board-container{position:relative;width:400px;height:400px;border:1px solid black}.row{display:flex;flex-direction:row;width:100%;height:50px}.promotion-list{display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:10;height:210px;width:55px}.square{width:50px;height:50px;border:0.1px black}.list-squares{width:50px;height:50px;border:0.1px black;background-color:lightgray}.piece{display:flex;justify-content:center;align-items:center;touch-action:none;cursor:grab;cursor:move}.promoting-piece{background-color:gray}.piece:active{cursor:grabbing}.dragging{transform:scale(1.2);transition:0.2s ease-in-out}.invisible{display:none}@media (max-width: 550px){#analysis-board-container{width:360px;height:360px}.row{height:45px}.square{width:45px;height:45px}.piece{height:40px}}";
 
 const AnalysisBoard = class {
   constructor(hostRef) {
@@ -1447,7 +1467,7 @@ const AnalysisBoard = class {
     // Get all the pieces and squares in the chess board
     const pieces = this.analysisBoardContainer.querySelectorAll('.piece');
     const squares = this.analysisBoardContainer.querySelectorAll('.square');
-    // Add drag and drop event listeners to each piece
+    // Add drag, drop and click event listeners to each piece
     pieces.forEach((piece) => {
       piece.addEventListener('dragstart', () => {
         dragStart(piece);
@@ -1456,20 +1476,10 @@ const AnalysisBoard = class {
         dragEnd(piece);
       });
       piece.addEventListener('click', () => {
-        if (piece.classList.contains('dragging')) {
-          piece.classList.remove('dragging');
-          return;
-        }
-        const otherHighlightedPiece = this.analysisBoardContainer.querySelector('.dragging');
-        if (otherHighlightedPiece !== null) {
-          const parentSquare = otherHighlightedPiece.parentElement;
-          dropPiece(parentSquare, this.analysisBoardContainer, this.validator);
-          return;
-        }
-        piece.classList.add('dragging');
+        onPieceClick(piece, this.analysisBoardContainer, this.validator);
       });
     });
-    // Add drag and drop event listeners to each square
+    // Add drag, drop and click event listeners to each square
     squares.forEach((square) => {
       // Allow dropping on the square by preventing the default behavior
       square.addEventListener('dragover', (e) => {

@@ -2,7 +2,7 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-const index = require('./index-1fbd0a00.js');
+const index = require('./index-5a38c56e.js');
 const BoardTypes = require('./BoardTypes-d378026b.js');
 
 /**

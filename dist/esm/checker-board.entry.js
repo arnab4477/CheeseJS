@@ -1,4 +1,4 @@
-import { r as registerInstance, h } from './index-e0c21bd2.js';
+import { r as registerInstance, h } from './index-bf3a8cd4.js';
 import { a as BoardArray } from './BoardTypes-d86232b4.js';
 
 /**

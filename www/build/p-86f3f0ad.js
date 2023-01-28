@@ -1,9 +1,22 @@
-import { B as BUILD, c as consoleDevInfo, p as plt, w as win, H, d as doc, N as NAMESPACE, a as promiseResolve, b as bootstrapLazy } from './index-96fdd9b9.js';
+import { B as BUILD, c as consoleDevInfo, p as plt, w as win, H, d as doc, N as NAMESPACE, a as promiseResolve, b as bootstrapLazy } from './index-725290d5.js';
+export { s as setNonce } from './index-725290d5.js';
 import { g as globalScripts } from './app-globals-0f993ce5.js';
 
 /*
- Stencil Client Patch Browser v2.20.0 | MIT Licensed | https://stenciljs.com
+ Stencil Client Patch Browser v2.22.2 | MIT Licensed | https://stenciljs.com
  */
+/**
+ * Helper method for querying a `meta` tag that contains a nonce value
+ * out of a DOM's head.
+ *
+ * @param doc The DOM containing the `head` to query against
+ * @returns The content of the meta tag representing the nonce value, or `undefined` if no tag
+ * exists or the tag has no content.
+ */
+function queryNonceMetaTagContent(doc) {
+    var _a, _b, _c;
+    return (_c = (_b = (_a = doc.head) === null || _a === void 0 ? void 0 : _a.querySelector('meta[name="csp-nonce"]')) === null || _b === void 0 ? void 0 : _b.getAttribute('content')) !== null && _c !== void 0 ? _c : undefined;
+}
 const getDynamicImportFunction = (namespace) => `__sc_import_${namespace.replace(/\s|-/g, '_')}`;
 const patchBrowser = () => {
     // NOTE!! This fn cannot use async/await!
@@ -61,7 +74,7 @@ const patchBrowser = () => {
         if (BUILD.dynamicImportShim && !win.customElements) {
             // module support, but no custom elements support (Old Edge)
             // @ts-ignore
-            return import(/* webpackChunkName: "polyfills-dom" */ './dom-6be6f662.js').then(() => opts);
+            return import(/* webpackChunkName: "polyfills-dom" */ './dom-c525f6e4.js').then(() => opts);
         }
     }
     return promiseResolve(opts);
@@ -81,6 +94,7 @@ const patchDynamicImport = (base, orgScriptElm) => {
         // basically this code is for old Edge, v18 and below
         const moduleMap = new Map();
         win[importFunctionName] = (src) => {
+            var _a;
             const url = new URL(src, base).href;
             let mod = moduleMap.get(url);
             if (!mod) {
@@ -90,6 +104,11 @@ const patchDynamicImport = (base, orgScriptElm) => {
                 script.src = URL.createObjectURL(new Blob([`import * as m from '${url}'; window.${importFunctionName}.m = m;`], {
                     type: 'application/javascript',
                 }));
+                // Apply CSP nonce to the script tag if it exists
+                const nonce = (_a = plt.$nonce$) !== null && _a !== void 0 ? _a : queryNonceMetaTagContent(doc);
+                if (nonce != null) {
+                    script.setAttribute('nonce', nonce);
+                }
                 mod = new Promise((resolve) => {
                     script.onload = () => {
                         resolve(win[importFunctionName].m);

@@ -16,3 +16,7 @@ export declare const dragEnd: (piece: Element) => void;
  * 'Pawn promotion'
  */
 export declare const dropPiece: (square: Element, boardHtml: HTMLElement, validator: Validator) => void;
+/**
+ * Event handler to run when a piece is clicked
+ */
+export declare const onPieceClick: (piece: Element, documentHtml: HTMLElement, validator: Validator) => void;

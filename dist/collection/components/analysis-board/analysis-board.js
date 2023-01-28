@@ -1,7 +1,7 @@
 import { h } from '@stencil/core';
 import { generateChessBoard } from '../../utils/chessboard';
 import Validator from '../../MoveValidators/Validator';
-import * as DnD from '../../utils/dragNdrop';
+import * as events from '../../utils/eventHandlers';
 export class AnalysisBoard {
   constructor() {
     // An instance of the Validator class for move validation
@@ -16,29 +16,19 @@ export class AnalysisBoard {
     // Get all the pieces and squares in the chess board
     const pieces = this.analysisBoardContainer.querySelectorAll('.piece');
     const squares = this.analysisBoardContainer.querySelectorAll('.square');
-    // Add drag and drop event listeners to each piece
+    // Add drag, drop and click event listeners to each piece
     pieces.forEach((piece) => {
       piece.addEventListener('dragstart', () => {
-        DnD.dragStart(piece);
+        events.dragStart(piece);
       });
       piece.addEventListener('dragend', () => {
-        DnD.dragEnd(piece);
+        events.dragEnd(piece);
       });
       piece.addEventListener('click', () => {
-        if (piece.classList.contains('dragging')) {
-          piece.classList.remove('dragging');
-          return;
-        }
-        const otherHighlightedPiece = this.analysisBoardContainer.querySelector('.dragging');
-        if (otherHighlightedPiece !== null) {
-          const parentSquare = otherHighlightedPiece.parentElement;
-          DnD.dropPiece(parentSquare, this.analysisBoardContainer, this.validator);
-          return;
-        }
-        piece.classList.add('dragging');
+        events.onPieceClick(piece, this.analysisBoardContainer, this.validator);
       });
     });
-    // Add drag and drop event listeners to each square
+    // Add drag, drop and click event listeners to each square
     squares.forEach((square) => {
       // Allow dropping on the square by preventing the default behavior
       square.addEventListener('dragover', (e) => {
@@ -46,13 +36,13 @@ export class AnalysisBoard {
       });
       square.addEventListener('drop', (e) => {
         e.preventDefault();
-        DnD.dropPiece(square, this.analysisBoardContainer, this.validator);
+        events.dropPiece(square, this.analysisBoardContainer, this.validator);
       });
       square.addEventListener('click', () => {
         const movingPiece = this.analysisBoardContainer.querySelector('.dragging');
         if (movingPiece === null)
           return;
-        DnD.dropPiece(square, this.analysisBoardContainer, this.validator);
+        events.dropPiece(square, this.analysisBoardContainer, this.validator);
       });
     });
   }

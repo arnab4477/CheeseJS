@@ -1,5 +1,6 @@
 import * as helpers from './validatorHelper';
 import * as check from './check';
+import { pieceImages as i } from '../pieces/pieceImages';
 /**
  * Function to check if a Pawn move is en passant.This does not heck the legality
  * of the move (like if the Pawn can en passant or not)
@@ -190,16 +191,16 @@ export const isPromotion = (color, destRank) => {
 export const createPawnPromotionHtmlElement = (rank) => {
   // Create HTML string for both the colors
   const whitePromotionHtml = `<div class='promotion-list'>
-       <img id="Q" alt='white queen' class="piece promoting-piece" src=${'../assets/WQ.svg.png'}>
-       <img id="R" alt='white rook' class="piece promoting-piece" src=${'../assets/WR.svg.png'}>
-       <img id="B" alt='white bishop' class="piece promoting-piece" src=${'../assets/WB.svg.png'}>
-       <img id="N" alt='white knight' class="piece promoting-piece" src=${'../assets/WN.svg.png'}>
+       <img id="Q" alt='white queen' class="piece promoting-piece" src=${i.Q}>
+       <img id="R" alt='white rook' class="piece promoting-piece" src=${i.R}>
+       <img id="B" alt='white bishop' class="piece promoting-piece" src=${i.B}>
+       <img id="N" alt='white knight' class="piece promoting-piece" src=${i.N}>
      </div>`;
   const blackPromotionHtml = `<div class='promotion-list'>
-      <img id="n" alt='black knight' class="piece promoting-piece" src=${'../assets/bn.svg.png'}>
-      <img id="b" alt='black bishop' class="piece promoting-piece" src=${'../assets/bb.svg.png'}>
-      <img id="r" alt='black rook' class="piece promoting-piece" src=${'../assets/br.svg.png'}>
-      <img id="q" alt='black queen' class="piece promoting-piece" src=${'../assets/bq.svg.png'}>
+      <img id="n" alt='black knight' class="piece promoting-piece" src=${i.n}>
+      <img id="b" alt='black bishop' class="piece promoting-piece" src=${i.b}>
+      <img id="r" alt='black rook' class="piece promoting-piece" src=${i.r}>
+      <img id="q" alt='black queen' class="piece promoting-piece" src=${i.q}>
      </div>`;
   // Add the HTML strings above to a Wrapper element
   // and extract it to return it as an individual element

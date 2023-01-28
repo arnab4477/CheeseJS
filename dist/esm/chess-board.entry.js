@@ -1,5 +1,5 @@
-import { r as registerInstance, h } from './index-e0c21bd2.js';
-import { g as generateChessBoard } from './chessboard-56c4a00e.js';
+import { r as registerInstance, h } from './index-bf3a8cd4.js';
+import { g as generateChessBoard } from './chessboard-456a9829.js';
 import './BoardTypes-d86232b4.js';
 
 const chessBoardCss = "#chess-board-container{position:relative;width:400px;height:400px;border:1px solid black}.row{display:flex;flex-direction:row;width:100%;height:50px}.square{width:50px;height:50px;border:0.1px black}.piece{display:flex;justify-content:center;align-items:center;touch-action:none}.invisible{display:none}@media (max-width: 550px){#chess-board-container{width:360px;height:360px}.row{height:45px}.square{width:45px;height:45px}.piece{height:40px}}";

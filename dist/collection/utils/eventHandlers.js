@@ -114,3 +114,23 @@ export const dropPiece = (square, boardHtml, validator) => {
     pieceBeingDragged.classList.remove('dragging');
   }
 };
+/**
+ * Event handler to run when a piece is clicked
+ */
+export const onPieceClick = (piece, documentHtml, validator) => {
+  // If the piece is already highlighted, unhighlight it  
+  if (piece.classList.contains('dragging')) {
+    piece.classList.remove('dragging');
+    return;
+  }
+  // See if any other piece is highlighted as well, if there is
+  // then try to move to that square (will be invalid for same color piece)
+  const otherHighlightedPiece = documentHtml.querySelector('.dragging');
+  if (otherHighlightedPiece !== null) {
+    const parentSquare = otherHighlightedPiece.parentElement;
+    dropPiece(parentSquare, documentHtml, validator);
+    return;
+  }
+  // Highlight the piece
+  piece.classList.add('dragging');
+};
