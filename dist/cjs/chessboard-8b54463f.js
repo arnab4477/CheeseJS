@@ -1,4 +1,6 @@
-import { a as BoardMap, B as BoardArray } from './BoardTypes.js';
+'use strict';
+
+const BoardTypes = require('./BoardTypes-d378026b.js');
 
 /**
  * This enum matches with the piece representations of an FEN string.
@@ -82,15 +84,15 @@ const getPieceImage = (type, color, BoardArray, rank, file) => {
 const fenToBoardMap = (fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR') => {
   const rows = fen.split('/');
   // create a copy of the BoardMap
-  const board = Object.assign({}, BoardMap);
+  const board = Object.assign({}, BoardTypes.BoardMap);
   let piece = '';
   // Iterate over the ranks and files of the Chess board array
-  for (let rank = 0; rank < BoardArray.length; rank++) {
-    for (let file = 0; file < BoardArray.length; file++) {
+  for (let rank = 0; rank < BoardTypes.BoardArray.length; rank++) {
+    for (let file = 0; file < BoardTypes.BoardArray.length; file++) {
       piece = rows[rank][file];
       // Each square is a 2 character string, like 'a1'
       // The following code will extract the file and rank out of each square
-      let currentSquare = BoardArray[rank][file];
+      let currentSquare = BoardTypes.BoardArray[rank][file];
       let currentFile = currentSquare[0];
       let currentRank = currentSquare[1];
       // if the piece is a character, it is a piece
@@ -129,11 +131,11 @@ const generateChessBoard = (lightSquareColor, darkSquareColor, fen) => {
   // HTML string to store the HTML representation of the chess board
   let html = ``;
   // iterate through each row of the chess board
-  for (let rank = 0; rank < BoardArray.length; rank++) {
+  for (let rank = 0; rank < BoardTypes.BoardArray.length; rank++) {
     // add opening div tag for the row to the HTML string
     html += `<div class="row">`;
     // iterate through each square in the row
-    for (let file = 0; file < BoardArray.length; file++) {
+    for (let file = 0; file < BoardTypes.BoardArray.length; file++) {
       // get the FEN notation for the current square
       let square = rows[rank][file];
       // set the color of the square to the current color
@@ -141,7 +143,7 @@ const generateChessBoard = (lightSquareColor, darkSquareColor, fen) => {
       // if the square is a character, it is a piece
       if (typeof square === 'string' && square.match(/[a-zA-Z]/)) {
         // add the HTML returned from the getPieeImage
-        html += getPieceImage(square, color, BoardArray, rank, file);
+        html += getPieceImage(square, color, BoardTypes.BoardArray, rank, file);
         // toggle the current color index to switch the color of the next square
         currentColorIndex = (currentColorIndex + 1) % 2;
       }
@@ -150,7 +152,7 @@ const generateChessBoard = (lightSquareColor, darkSquareColor, fen) => {
         // if the number is >1, then it means there are that many empty squares
         // add the number of empty squares to the HTML string
         for (let k = 0; k < parseInt(square); k++) {
-          html += `<div id="${BoardArray[rank][file]}" class="square" style="background-color: ${color}"></div>`;
+          html += `<div id="${BoardTypes.BoardArray[rank][file]}" class="square" style="background-color: ${color}"></div>`;
           currentColorIndex = (currentColorIndex + 1) % 2;
           color = colorArray[currentColorIndex];
           file++;
@@ -165,4 +167,6 @@ const generateChessBoard = (lightSquareColor, darkSquareColor, fen) => {
   return html;
 };
 
-export { fenToBoardMap as f, generateChessBoard as g, pieceImages as p };
+exports.fenToBoardMap = fenToBoardMap;
+exports.generateChessBoard = generateChessBoard;
+exports.pieceImages = pieceImages;

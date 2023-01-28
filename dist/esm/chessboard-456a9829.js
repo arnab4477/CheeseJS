@@ -1,4 +1,4 @@
-import { a as BoardMap, B as BoardArray } from './BoardTypes.js';
+import { B as BoardMap, a as BoardArray } from './BoardTypes-d86232b4.js';
 
 /**
  * This enum matches with the piece representations of an FEN string.
