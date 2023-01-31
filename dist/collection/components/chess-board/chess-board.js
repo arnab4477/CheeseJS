@@ -32,7 +32,7 @@ export class ChessBoard {
         }
         const otherHighlightedPiece = this.chessBoardContainer.querySelector('.dragging');
         if (otherHighlightedPiece !== null) {
-          const parentSquare = otherHighlightedPiece.parentElement;
+          const parentSquare = piece.parentElement;
           parentSquare.innerHTML = '';
           parentSquare.appendChild(otherHighlightedPiece);
           otherHighlightedPiece.classList.remove('dragging');
@@ -59,9 +59,11 @@ export class ChessBoard {
         const pieceBeingDragged = this.chessBoardContainer.querySelector('.dragging');
         if (pieceBeingDragged === null)
           return;
+        if (!(pieceBeingDragged.parentElement.id === square.id)) {
+          pieceBeingDragged.classList.remove('dragging');
+        }
         square.innerHTML = '';
         square.appendChild(pieceBeingDragged);
-        pieceBeingDragged.classList.remove('dragging');
       });
     });
   }
